@@ -1,0 +1,10 @@
+defaultIndent: '    '
+maximumIndentation: -1
+
+modifyLineBreaks:
+    textWrapOptions:
+        columns: 120
+        multipleSpacesToSingle: 1
+        removeParagraphLineBreaks: 0
+        
+indentPreamble: 1
