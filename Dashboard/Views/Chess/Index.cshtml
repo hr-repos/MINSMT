@@ -1,0 +1,66 @@
+@{
+    ViewData["Title"] = "Chess Game";
+}
+
+<link rel="stylesheet" href="~/lib/chessboardjs/chessboard-1.0.0.css" />
+
+<div class="chess-container">
+    <div id="gameOverMessage"></div>
+
+    <div id="board" style="width: 500px"></div>
+
+    <button id="resetBtn" class="reset-btn">Reset Game</button>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="~/lib/chessboardjs/chessboard-1.0.0.js"></script>
+
+<script>
+    var board = Chessboard('board', {
+        draggable: true,
+        position: '@ViewBag.FEN',
+        pieceTheme: '/lib/chessboardjs/img/chesspieces/wikipedia/{piece}.png',
+        onDrop: onDrop
+    });
+
+    function onDrop(source, target, piece, newPos, oldPos, orientation) {
+        $.ajax({
+            url: '/Chess/Move',
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({ from: source, to: target }),
+
+            success: function (response) {
+                if (!response.valid) {
+                    board.position(oldPos);
+                    return;
+                }
+
+                board.position(response.fen);
+
+                if (response.winner) {
+                    $("#gameOverMessage")
+                        .text("Checkmate! Winner: " + response.winner)
+                        .fadeIn();
+                }
+            },
+
+            error: function () {
+                board.position(oldPos);
+            }
+        });
+    }
+
+    $('#resetBtn').click(function () {
+        $.post('/Chess/Reset', function (response) {
+            board.position(response.fen);
+            $("#gameOverMessage").hide().text("");
+        });
+    });
+
+    setInterval(() => {
+        $.get('/Chess/State', function (response) {
+            board.position(response.fen);
+        });
+    }, 1000);
+</script>
