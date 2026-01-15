@@ -5,26 +5,22 @@
 
 // Put internal dependencies here:
 #include "multiplexer.h"
-#include "secret.h"
+#include "config.h"
+#include "functions.h"
 
 // Definitions multiplexers
-#define BOARDWIDTHHIGHT 8
 #define MULTIPLEXERS_COUNT 4
-// Definitions Wifi and MQTT
-#define MQTT_HOST "145.24.237.4"
-#define MQTT_PORT 8883
 
 // Function declarations:
 void readBoardState(bool board[BOARDWIDTHHIGHT][BOARDWIDTHHIGHT]);
 void setup_wifi(const char *ssid, const char *password);
-void callback(char* topic, byte* payload, unsigned int length);
 
 // stores if a piece is detected on the corresponding place on the board
 bool boardPresence[BOARDWIDTHHIGHT][BOARDWIDTHHIGHT] = {false};
 // Contains multiplexer objects for all 4 multiplexers
-Multiplexer* multiPlexers[MULTIPLEXERS_COUNT];
-WiFiClient espClient;
-PubSubClient client(espClient);
+Multiplexer* multiPlexers[MULTIPLEXERS_COUNT];  // defined as extern in config.h
+WiFiClient espClient;                           // defined as extern in config.h
+PubSubClient client(espClient);                 // defined as extern in config.h
 
 
 void setup()
@@ -32,24 +28,13 @@ void setup()
     Serial.begin(115200);
 
     // Initialize multiplexers all sharing the same select pins. The signal pins should be unique
-    multiPlexers[0] = new Multiplexer(19, 18, 5, 17, 16); // Mux for rows 1 and 2
-    multiPlexers[1] = new Multiplexer(19, 18, 5, 17, 16); // Mux for rows 3 and 4
-    multiPlexers[2] = new Multiplexer(19, 18, 5, 17, 16); // Mux for rows 5 and 6
-    multiPlexers[3] = new Multiplexer(19, 18, 5, 17, 16); // Mux for rows 7 and 8
-
-    // Met deze loop wacht de code tot de seriele monitor verbonden is voordat deze verder gaat, handig voor debuggen.
-    // pinMode(LED_BUILTIN, OUTPUT);
-    // digitalWrite(LED_BUILTIN, HIGH);
-    // while (!Serial)
-    // {
-    //     digitalWrite(LED_BUILTIN, HIGH);
-    //     delay(1000);
-    //     digitalWrite(LED_BUILTIN, LOW);
-    //     delay(1000);
-    // }
-
+    multiPlexers[0] = new Multiplexer(19, 18, 5, 17, 27); // Mux for rows 1 and 2
+    multiPlexers[1] = new Multiplexer(19, 18, 5, 17, 14); // Mux for rows 3 and 4
+    multiPlexers[2] = new Multiplexer(19, 18, 5, 17, 12); // Mux for rows 5 and 6
+    multiPlexers[3] = new Multiplexer(19, 18, 5, 17, 13); // Mux for rows 7 and 8
+    
     readBoardState(boardPresence);
-    Serial.printf("Piece at 3,5: %d\n", boardPresence[3][5]);
+    isStartPosition(boardPresence);
 }
 
 void loop()
@@ -57,22 +42,6 @@ void loop()
     // put your main code here, to run repeatedly:
 }
 
-void callback(char* topic, byte* payload, unsigned int length)
-{
-    char message[length + 1]; // +1 for null terminator
-    for (int i = 0; i < length; i++) 
-    {
-        message[i] = (char)payload[i];
-    }
-    message[length] = '\0';
-    // for debugging
-    Serial.printf("Message arrived [%s] %s\n", topic, message);
-
-    if (strcmp(topic, "topic1") == 0)
-    {
-        Serial.println("message received on topic1");
-    }
-}
 
 void reconnectMqtt() {
     // Loop until we're reconnected
