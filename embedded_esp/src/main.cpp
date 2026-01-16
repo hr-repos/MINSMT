@@ -4,9 +4,10 @@
 #include <PubSubClient.h>
 
 // Put internal dependencies here:
-#include "multiplexer.h"
 #include "config.h"
+#include "multiplexer.h"
 #include "functions.h"
+#include "lcd.h"
 
 // Definitions multiplexers
 #define MULTIPLEXERS_COUNT 4
@@ -22,6 +23,10 @@ Multiplexer* multiPlexers[MULTIPLEXERS_COUNT];  // defined as extern in config.h
 WiFiClient espClient;                           // defined as extern in config.h
 PubSubClient client(espClient);                 // defined as extern in config.h
 
+LcdModule lcd;                                  // LCD module object
+
+int playCode = generatePlayCode();              // defined as extern in config.h // unique play code for this game session - is used as mqtt topic
+gameState currentGameState = WAITING_FOR_PLAYERS;
 
 void setup()
 {
@@ -32,48 +37,52 @@ void setup()
     multiPlexers[1] = new Multiplexer(19, 18, 5, 17, 14); // Mux for rows 3 and 4
     multiPlexers[2] = new Multiplexer(19, 18, 5, 17, 12); // Mux for rows 5 and 6
     multiPlexers[3] = new Multiplexer(19, 18, 5, 17, 13); // Mux for rows 7 and 8
+    lcd.initialize();
     
     readBoardState(boardPresence);
-    isStartPosition(boardPresence);
+    lcd.setTextFirstLine("Reset the board to start playing");
+    delay(2000);
+
+    // If the board is (re)started it must be in the starting position to continue
+    while (isStartPosition(boardPresence))
+    {
+        Serial.println("Waiting for players to set up the board...");
+        delay(2000);
+        readBoardState(boardPresence);
+    }
+    Serial.println("Board set up correctly.");
+
+    lcd.setTextFirstLine("Share this code to start playing:");
+    lcd.setTextSecondLine(String(playCode).c_str());
+
+    setup_wifi(WIFI_SSID, WIFI_PASSWORD);
+    client.setServer(MQTT_SERVER, MQTT_PORT);
+    client.setCallback(callback);
 }
 
 void loop()
 {
-    // put your main code here, to run repeatedly:
-}
+    // MQTT reconnect
+    if (!client.connected()) {
+        Serial.println("mqtt disconnected");
+        reconnectMqtt();
+    }
+    client.loop();
 
-
-void reconnectMqtt() {
-    // Loop until we're reconnected
-    while (!client.connected()) 
-    {
-        Serial.print("Attempting MQTT connection...");
-
-        // Attempt to connect
-        if (client.connect("board", MQTT_USER, MQTT_PASS)) 
-        {
-            Serial.println("mqtt connected");
-
-            // Once connected, publish an announcement...
-            client.publish("board/status", "board connected");
-
-            // ... and resubscribe
-            client.subscribe("topic1");
-        } else 
-        {
-            Serial.print("failed, rc=");
-            Serial.print(client.state());
-            Serial.println(" try again in 5 seconds");
-            // Wait 5 seconds before retrying
-            delay(5000);
-        }
+    // if the board may move the moveLoop is called
+    if (currentGameState == WAITING_FOR_BOARD_MOVE){
+        moveLoop();
     }
 }
 
+
+
+
 void setup_wifi(const char* ssid, const char* password)
 {
+    Serial.print("MAC address: ");
+    Serial.println(WiFi.macAddress());
     Serial.print("Connecting to ");
-    Serial.println(ssid);
 
     WiFi.mode(WIFI_STA);
     WiFi.begin(ssid, password);
@@ -87,26 +96,8 @@ void setup_wifi(const char* ssid, const char* password)
     Serial.print("\nWiFi connected. ");
     Serial.print("IP address: ");
     Serial.println(WiFi.localIP());
+    
 }
 
 
-/// @brief Reads the state of the entire board and updates the boardPresence array
-/// @param board A 2D array representing the board state)
-/// @test Serial.printf("y: %d\tx: %d\tch: %d\n", h, w, channel);
-/// @note The board here is not a copy but a reference to the original array when compiled 
-void readBoardState(bool board[BOARDWIDTHHIGHT][BOARDWIDTHHIGHT])
-{
-    for (int mPlexer = 0; mPlexer < MULTIPLEXERS_COUNT; mPlexer++)
-    { 
-        for (int channel = 0; channel < MULTIPLEXER_CHANNELS_COUNT; channel++)
-        {
-            int w = mPlexer * 2 + (channel / BOARDWIDTHHIGHT);
-            int h = channel % BOARDWIDTHHIGHT;
-            board[w][h] = false; //multiPlexers[mPlexer]->readChannel(channel);
-            if (w == 3 && h == 5)
-            {
-                board[w][h] = true;
-            }
-        }
-    }
-}
+
