@@ -1,6 +1,25 @@
-// #include <Arduino.h>
-#include "config.h"
+#include "functions.h"
 
+/// @brief Reads the state of the entire board and updates the boardPresence array
+/// @param board A 2D array representing the board state)
+/// @test Serial.printf("y: %d\tx: %d\tch: %d\n", h, w, channel);
+/// @note The board here is not a copy but a reference to the original array when compiled 
+void readBoardState(bool board[BOARDWIDTHHIGHT][BOARDWIDTHHIGHT])
+{
+    for (int mPlexer = 0; mPlexer < MULTIPLEXERS_COUNT; mPlexer++)
+    { 
+        for (int channel = 0; channel < MULTIPLEXER_CHANNELS_COUNT; channel++)
+        {
+            int w = mPlexer * 2 + (channel / BOARDWIDTHHIGHT);
+            int h = channel % BOARDWIDTHHIGHT;
+            board[w][h] = false; //multiPlexers[mPlexer]->readChannel(channel);
+            if (w == 3 && h == 5)
+            {
+                board[w][h] = true;
+            }
+        }
+    }
+}
 
 /**
  * @brief Checks if the board is in the starting position
@@ -35,25 +54,8 @@ bool isStartPosition(bool board[BOARDWIDTHHIGHT][BOARDWIDTHHIGHT]){
     return true;
 }
 
-/**
- * @brief Callback function to handle incoming MQTT messages
- * @param topic The topic on which the message was received
- * @param payload The message payload
- * @param length The length of the payload
- */
-void callback(char* topic, byte* payload, unsigned int length)
-{
-    char message[length + 1]; // +1 for null terminator
-    for (int i = 0; i < length; i++) 
-    {
-        message[i] = (char)payload[i];
-    }
-    message[length] = '\0';
-    // for debugging
-    Serial.printf("Message arrived [%s] %s\n", topic, message);
-
-    if (strcmp(topic, "topic1") == 0)
-    {
-        Serial.println("message received on topic1");
-    }
+/// @brief Generates a random play code which will be used as mqtt topic
+/// @return 
+int generatePlayCode(){
+    return random(1000, 9999);
 }
