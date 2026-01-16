@@ -1,6 +1,8 @@
 using ChessDotNet;
 using Microsoft.AspNetCore.Mvc;
 
+namespace TestCode.Controllers;
+
 public class ChessController : Controller
 {
     private static ChessGame game = new ChessGame();
@@ -21,7 +23,6 @@ public class ChessController : Controller
     [HttpPost]
     public async Task<IActionResult> Move([FromBody] MoveRequest req)
     {
-        // Player move
         var move = new Move(req.From, req.To, game.WhoseTurn);
 
         if (!game.IsValidMove(move))
@@ -29,15 +30,13 @@ public class ChessController : Controller
 
         game.MakeMove(move, true);
 
-        // AI move
         if (game.WhoseTurn == Player.Black)
         {
             string fen = game.GetFen();
             string best = await engine.GetMove(fen);
 
-            // Convert "e2e4" into ChessDotNet Move
             string from = best.Substring(0, 2);
-            string to   = best.Substring(2, 2);
+            string to = best.Substring(2, 2);
 
             var aiMove = new Move(from, to, Player.Black);
 
@@ -60,7 +59,7 @@ public class ChessController : Controller
     [HttpPost]
     public IActionResult Reset()
     {
-        game = new ChessGame();   // Completely reset the game state
+        game = new ChessGame();
         return Json(new { fen = game.GetFen() });
     }
 }

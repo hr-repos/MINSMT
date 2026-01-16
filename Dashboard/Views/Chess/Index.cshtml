@@ -3,24 +3,104 @@
 }
 
 <link rel="stylesheet" href="~/lib/chessboardjs/chessboard-1.0.0.css" />
+<link rel="stylesheet" href="~/css/site.css" />
 
-<div class="chess-container">
-    <div id="gameOverMessage"></div>
+<div class="cc-shell">
 
-    <div id="board" style="width: 500px"></div>
+    <!-- LEFT: empty sidebar (chess.com style) -->
+    <aside class="cc-leftbar">
+    <div class="cc-leftbar-title">MINSMT</div>
+    </aside>
 
-    <button id="resetBtn" class="reset-btn">Reset Game</button>
+    <!-- RIGHT: content -->
+    <div class="cc-content">
+        <div class="cc-page">
+            <main class="cc-main">
+
+                <!-- LEFT: board + players -->
+                <section class="cc-board-area">
+
+                    <div class="cc-board-wrap">
+                        <div class="cc-frame">
+
+                            <!-- TOP BAR -->
+                            <div class="cc-boardbar cc-boardbar-top">
+                                <div class="cc-player-left">
+                                    <span class="cc-avatar" aria-hidden="true">
+                                        <svg viewBox="0 0 64 64" role="img" focusable="false">
+                                            <circle cx="32" cy="24" r="12"></circle>
+                                            <path d="M12 56c2-12 12-20 20-20s18 8 20 20"></path>
+                                        </svg>
+                                    </span>
+                                    <span>Opponent</span>
+                                </div>
+
+                                <span class="cc-timer" id="timerTop">10:00</span>
+                            </div>
+
+                            <!-- BOARD -->
+                            <div id="board"></div>
+
+                            <!-- BOTTOM BAR -->
+                            <div class="cc-boardbar cc-boardbar-bottom">
+                                <div class="cc-player-left">
+                                    <span class="cc-avatar" aria-hidden="true">
+                                        <svg viewBox="0 0 64 64" role="img" focusable="false">
+                                            <circle cx="32" cy="24" r="12"></circle>
+                                            <path d="M12 56c2-12 12-20 20-20s18 8 20 20"></path>
+                                        </svg>
+                                    </span>
+                                    <span>Player</span>
+                                </div>
+
+                                <span class="cc-timer" id="timerBottom">10:00</span>
+                            </div>
+
+                        </div> <!-- closes cc-frame -->
+                    </div> <!-- closes cc-board-wrap -->
+
+                    <div id="gameOverMessage" class="cc-gameover" style="display:none;"></div>
+
+                </section>
+
+                <!-- RIGHT: sidebar -->
+                <aside class="cc-sidebar">
+
+                    <div class="cc-card">
+                        <button id="startBtn" class="cc-primary" type="button">Start Game</button>
+                    </div>
+
+                    <div class="cc-card">
+                        <div class="cc-section-title">Moves</div>
+                        <ol id="moveList" class="cc-moves"></ol>
+                    </div>
+
+                </aside>
+
+            </main>
+        </div>
+    </div>
 </div>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="~/lib/chessboardjs/chessboard-1.0.0.js"></script>
 
 <script>
+    var lastFen = null;
+
     var board = Chessboard('board', {
         draggable: true,
         position: '@ViewBag.FEN',
         pieceTheme: '/lib/chessboardjs/img/chesspieces/wikipedia/{piece}.png',
         onDrop: onDrop
+    });
+
+    // ✅ Important: force resize AFTER layout/CSS applied
+    setTimeout(() => board.resize(), 0);
+    setTimeout(() => board.resize(), 250);
+
+    $(window).on('resize', function () {
+        board.resize();
     });
 
     function onDrop(source, target, piece, newPos, oldPos, orientation) {
@@ -51,7 +131,7 @@
         });
     }
 
-    $('#resetBtn').click(function () {
+    $('#startBtn').click(function () {
         $.post('/Chess/Reset', function (response) {
             board.position(response.fen);
             $("#gameOverMessage").hide().text("");
@@ -60,7 +140,10 @@
 
     setInterval(() => {
         $.get('/Chess/State', function (response) {
-            board.position(response.fen);
+            if (response && response.fen && response.fen !== lastFen) {
+                lastFen = response.fen;
+                board.position(response.fen);
+            }
         });
     }, 1000);
 </script>
