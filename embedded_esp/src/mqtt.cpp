@@ -53,3 +53,8 @@ void callback(char* topic, byte* payload, unsigned int length)
     }
 }
 
+void sendMove() {
+    // Placeholder for sending a move via MQTT
+    const char* moveMessage = "e2e4"; // Example move
+    client.publish(String(playCode).c_str(), moveMessage);
+}

@@ -3,6 +3,7 @@
 #include <WiFi.h>
 #include <PubSubClient.h>
 #include "multiplexer.h"
+#include "lcd.h"
 
 #define BOARDWIDTHHIGHT 8
 #define MULTIPLEXERS_COUNT 4
@@ -16,16 +17,17 @@
 #define MQTT_SERVER "145.24.237.4"
 #define MQTT_PORT 8883
 
+enum gameState {
+    WAITING_FOR_PLAYERS,
+    WAITING_FOR_OPPONENT_MOVE,
+    WAITING_FOR_BOARD_MOVE,
+    FINISHED
+};
+
 extern bool boardPresence[BOARDWIDTHHIGHT][BOARDWIDTHHIGHT];
-// Contains multiplexer objects for all 4 multiplexers
 extern Multiplexer* multiPlexers[MULTIPLEXERS_COUNT];  
 extern WiFiClient espClient;                          
 extern PubSubClient client;   
-extern int playCode;     
-
-
-enum gameState {
-    WAITING_FOR_PLAYERS,
-    IN_PROGRESS,
-    FINISHED
-};
+extern int playCode;   
+extern LcdModule lcd;   
+extern gameState currentGameState;

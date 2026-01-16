@@ -1,4 +1,5 @@
 #include "functions.h"
+#include "config.h"
 
 /// @brief Reads the state of the entire board and updates the boardPresence array
 /// @param board A 2D array representing the board state)
@@ -54,8 +55,15 @@ bool isStartPosition(bool board[BOARDWIDTHHIGHT][BOARDWIDTHHIGHT]){
     return true;
 }
 
+/// @brief Contains the main game loop for handling moves
+void moveLoop(){
+    delay(10000); // Placeholder for actual move handling logic
+    currentGameState = WAITING_FOR_OPPONENT_MOVE; // Placeholder to change game state
+    sendMove();
+}
+
 /// @brief Generates a random play code which will be used as mqtt topic
-/// @return 
+/// @return The generated play code
 int generatePlayCode(){
     return random(1000, 9999);
 }
