@@ -23,7 +23,7 @@ public class ChessController : Controller
         bool success = ChessboardService.ApplyPhysicalMove(req.From, req.To);
 
         if (!success)
-            return Json(new { valid = false, fen = ChessboardService.GetFen() });
+            return Json(new { valid = false, fen = ChessboardService.GetFen(), winner = ChessboardService.GetWinner() });
 
         // Make AI move if applicable
         string aiMove = await ChessboardService.MakeAIMoveAsync();
