@@ -7,7 +7,7 @@
 
 <div class="cc-shell">
 
-    <!-- LEFT: empty sidebar (chess.com style) -->
+    <!-- LEFT: empty sidebar  -->
     <aside class="cc-leftbar">
     <div class="cc-leftbar-title">MINSMT</div>
     </aside>
@@ -38,7 +38,7 @@
                                 <span class="cc-timer" id="timerTop">10:00</span>
                             </div>
 
-                            <!-- BOARD -->
+                            
                             <div id="board"></div>
 
                             <!-- BOTTOM BAR -->
@@ -56,8 +56,8 @@
                                 <span class="cc-timer" id="timerBottom">10:00</span>
                             </div>
 
-                        </div> <!-- closes cc-frame -->
-                    </div> <!-- closes cc-board-wrap -->
+                        </div>
+                    </div>
 
                     <div id="gameOverMessage" class="cc-gameover" style="display:none;"></div>
 
@@ -68,6 +68,13 @@
 
                     <div class="cc-card">
                         <button id="startBtn" class="cc-primary" type="button">Start Game</button>
+
+                            <!-- Time selector -->
+                        <div class="cc-time-select">
+                            <button class="cc-time-btn active" data-time="10">10 min</button>
+                            <button class="cc-time-btn" data-time="20">20 min</button>
+                            <button class="cc-time-btn" data-time="30">30 min</button>
+                        </div>
                     </div>
 
                     <div class="cc-card">
@@ -86,6 +93,19 @@
 <script src="~/lib/chessboardjs/chessboard-1.0.0.js"></script>
 
 <script>
+    let selectedTime = 10;
+
+    $('.cc-time-btn').click(function () {
+        $('.cc-time-btn').removeClass('active');
+        $(this).addClass('active');
+
+        selectedTime = $(this).data('time');
+        console.log("Selected time:", selectedTime);
+    });
+</script>
+
+
+<script>
     var lastFen = null;
 
     var board = Chessboard('board', {
@@ -95,7 +115,6 @@
         onDrop: onDrop
     });
 
-    // ✅ Important: force resize AFTER layout/CSS applied
     setTimeout(() => board.resize(), 0);
     setTimeout(() => board.resize(), 250);
 
