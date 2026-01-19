@@ -10,6 +10,7 @@
 
   <ItemGroup>
     <PackageReference Include="ChessDotNet" Version="1.0.0" />
+    <PackageReference Include="MQTTnet" Version="5.0.1.1416" />
   </ItemGroup>
 
   <ItemGroup>

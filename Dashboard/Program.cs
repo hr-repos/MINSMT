@@ -5,6 +5,8 @@ builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
 
+_ = MqttListener.Connect();
+
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {

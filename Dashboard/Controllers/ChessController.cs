@@ -5,62 +5,46 @@ namespace TestCode.Controllers;
 
 public class ChessController : Controller
 {
-    private static ChessGame game = new ChessGame();
-    private static StockfishEngineService engine = new StockfishEngineService("StockfishEngine/stockfish-windows-x86-64-avx2.exe");
-
     public IActionResult Index()
     {
-        ViewBag.FEN = game.GetFen();
+        ViewBag.FEN = ChessboardService.GetFen();
         return View();
     }
 
     [HttpGet]
     public IActionResult State()
     {
-        return Json(new { fen = game.GetFen() });
+        return Json(new { fen = ChessboardService.GetFen() });
     }
 
     [HttpPost]
     public async Task<IActionResult> Move([FromBody] MoveRequest req)
     {
-        var move = new Move(req.From, req.To, game.WhoseTurn);
+        bool success = ChessboardService.ApplyPhysicalMove(req.From, req.To);
 
-        if (!game.IsValidMove(move))
-            return Json(new { valid = false });
+        if (!success)
+            return Json(new { valid = false, fen = ChessboardService.GetFen() });
 
-        game.MakeMove(move, true);
+        // Make AI move if applicable
+        string aiMove = await ChessboardService.MakeAIMoveAsync();
 
-        if (game.WhoseTurn == Player.Black)
-        {
-            string fen = game.GetFen();
-            string best = await engine.GetMove(fen);
-
-            string from = best.Substring(0, 2);
-            string to = best.Substring(2, 2);
-
-            var aiMove = new Move(from, to, Player.Black);
-
-            if (game.IsValidMove(aiMove))
-                game.MakeMove(aiMove, true);
-        }
-
-        string winner = null;
-        if (game.IsCheckmated(Player.White)) winner = "Black";
-        if (game.IsCheckmated(Player.Black)) winner = "White";
+        // Check for winner
+        string winner = ChessboardService.GetWinner();
 
         return Json(new
         {
             valid = true,
-            fen = game.GetFen(),
-            winner = winner
+            fen = ChessboardService.GetFen(),
+            winner = winner,
+            aiMove = aiMove
         });
     }
 
     [HttpPost]
     public IActionResult Reset()
     {
-        game = new ChessGame();
-        return Json(new { fen = game.GetFen() });
+        ChessboardService.Reset();
+        return Json(new { fen = ChessboardService.GetFen() });
     }
 }
 
