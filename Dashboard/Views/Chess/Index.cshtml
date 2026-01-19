@@ -68,6 +68,20 @@
 
                     <div class="cc-card">
                         <button id="startBtn" class="cc-primary" type="button">Start Game</button>
+                        <button id="surrenderBtn" class="cc-danger" type="button">Surrender</button>
+                    <div class="cc-mode-select">
+                        <button class="cc-mode-btn active" data-mode="player" type="button">Player</button>
+                        <button class="cc-mode-btn" data-mode="cpu" type="button">CPU</button>
+
+                    </div>
+
+                <div class="cc-difficulty-select" style="display:none;">
+                    <button class="cc-difficulty-btn active" data-level="beginner" type="button">Beginner</button>
+                    <button class="cc-difficulty-btn" data-level="intermediate" type="button">Intermediate</button>
+                    <button class="cc-difficulty-btn" data-level="expert" type="button">Expert</button>
+                    <button class="cc-difficulty-btn" data-level="master" type="button">Master</button>
+                </div>
+
 
                             <!-- Time selector -->
                         <div class="cc-time-select">
@@ -102,6 +116,39 @@
         selectedTime = $(this).data('time');
         console.log("Selected time:", selectedTime);
     });
+</script>
+
+<script>
+    let selectedMode = "player";
+    let selectedDifficulty = "beginner";
+
+    function updateDifficultyVisibility() {
+        if (selectedMode === "cpu") {
+            $('.cc-difficulty-select').fadeIn(120);
+        } else {
+            $('.cc-difficulty-select').fadeOut(120);
+        }
+    }
+
+    $('.cc-mode-btn').click(function () {
+        $('.cc-mode-btn').removeClass('active');
+        $(this).addClass('active');
+
+        selectedMode = $(this).data('mode');
+        updateDifficultyVisibility();
+
+        console.log("Selected mode:", selectedMode);
+    });
+
+    $('.cc-difficulty-btn').click(function () {
+        $('.cc-difficulty-btn').removeClass('active');
+        $(this).addClass('active');
+
+        selectedDifficulty = $(this).data('level');
+        console.log("Selected difficulty:", selectedDifficulty);
+    });
+
+    updateDifficultyVisibility();
 </script>
 
 
@@ -156,6 +203,12 @@
             $("#gameOverMessage").hide().text("");
         });
     });
+
+    $('#surrenderBtn').click(function () {
+    $.post('/Chess/Surrender', function (response) {
+        $("#gameOverMessage").text("You surrendered.").fadeIn();
+    });
+});
 
     setInterval(() => {
         $.get('/Chess/State', function (response) {
