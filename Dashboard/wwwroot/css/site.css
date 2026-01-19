@@ -148,7 +148,31 @@ body{
 }
 
 
-#board{ width: 100%; }
+#board{
+  width: 100%;
+  border-radius: 0 !important;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.35) !important;
+  border: 1px solid rgba(255,255,255,0.08) !important;
+}
+
+#board .white-1e1d7{
+  background-color: #eeeed2 !important;
+}
+
+#board .black-3c85d{
+  background-color: #769656 !important;
+}
+
+#board .white-1e1d7 .notation-322f9{
+  color: #769656 !important;
+  font-weight: 800;
+}
+
+
+#board .black-3c85d .notation-322f9{
+  color: #eeeed2 !important;
+  font-weight: 800;
+}
 
 
 .cc-sidebar{
