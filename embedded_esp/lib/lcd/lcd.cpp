@@ -1,17 +1,15 @@
 #include "lcd.h"
 #include <LiquidCrystal_I2C.h>
 
-LiquidCrystal_I2C lcd(0x27, 16, 2);
+// Use internal linkage so the global name doesn't collide with other translation units
+static LiquidCrystal_I2C lcd(0x27, 16, 2);
 
-// LcdModule::LcdModule(){
-//     lcd.init();
-//     changeBackLightState(true);
-// }
-char test[16];
+// Pre-built empty line for quick clearing
+static char emptyLine[17] = "                "; // 16 spaces + null terminator
 
 void LcdModule::initialize(){
     lcd.init();
-    // lcd.clear();
+    // lcdInternal.clear();
     changeBackLightState(true);
 }
 
@@ -24,17 +22,21 @@ void LcdModule::setTextSecondLine(char *text){
     lcd.setCursor(0, 1);
     lcd.print(text);
 }
+void LcdModule::setTextSecondLine(int number){
+    lcd.setCursor(0, 1);
+    lcd.print(number);
+}
 
 void LcdModule::setTextLineWrap(char *text){
 
 }
 
 void LcdModule::clearLineOne(){
-    setTextFirstLine(test);
+    setTextFirstLine(emptyLine);
 }
 
 void LcdModule::clearLineTwo(){
-    setTextSecondLine(test);
+    setTextSecondLine(emptyLine);
 }
 
 void LcdModule::clearDisplay(){

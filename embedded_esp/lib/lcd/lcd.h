@@ -17,6 +17,7 @@ class LcdModule
         void initialize();
         void setTextFirstLine(char *text);
         void setTextSecondLine(char *text);
+        void setTextSecondLine(int number);
         void setTextLineWrap(char *text);
         void clearLineOne();
         void clearLineTwo();
