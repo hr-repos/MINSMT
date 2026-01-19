@@ -75,13 +75,15 @@ void setup()
 void loop()
 {
     // MQTT reconnect
-    if (!client.connected()) {
+    if (!client.connected()) 
+    {
         Serial.println("mqtt disconnected");
         reconnectMqtt();
     }
     client.loop();
 
-    if (currentGameState == WAITING_FOR_BOARD_MOVE){
+    if (currentGameState == WAITING_FOR_BOARD_MOVE)
+    {
         bool currentState[BOARDWIDTHHIGHT][BOARDWIDTHHIGHT];
         readBoardState(currentState);
         String move = createMoveStr(lastState, currentState);
@@ -90,16 +92,33 @@ void loop()
         currentGameState = WAITING_FOR_OPPONENT_MOVE;
     }
 
-    if (timerKeepAlive.checkTimer()) {
+    if (timerKeepAlive.checkTimer()) 
+    {
         sendMessage((playcodeString + "/alive/board").c_str(), "board alive");
     }
 
-    if (timerOpponentCheck.checkTimer()) {
+    if (timerOpponentCheck.checkTimer()) 
+    {
         digitalWrite(pinInactiveOpponentIndicator, HIGH);
     }
 
-    if (pinbuttonReset == HIGH) {
+    if (pinbuttonReset == HIGH) 
+    {
         ESP.restart();
+    }
+
+    if (currentGameState == CHECKMATE) 
+    {
+        lcd.clearDisplay();
+        lcd.setTextFirstLine("Checkmate!");
+        delay(5000);
+        while(true)
+        {
+            if (pinbuttonReset == HIGH) 
+            {
+                ESP.restart();
+            }
+        }   
     }
 }
 

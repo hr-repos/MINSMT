@@ -59,6 +59,12 @@ void callback(char* topic, byte* payload, unsigned int length)
         timerOpponentCheck.resetTimer();
         digitalWrite(pinInactiveOpponentIndicator, LOW); // Test action
     }
+
+    if (strcmp(topic, (playcodeString + "/checkmate").c_str() ) == 0)
+    {
+        Serial.println("Checkmate received from opponent.");
+        currentGameState = CHECKMATE;
+    }
 }
 
 void sendMove() {
