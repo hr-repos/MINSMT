@@ -206,7 +206,11 @@
 
     $('#surrenderBtn').click(function () {
     $.post('/Chess/Surrender', function (response) {
-        $("#gameOverMessage").text("You surrendered.").fadeIn();
+        if (response.winner) {
+            $("#gameOverMessage")
+                .text("You surrendered! Winner: " + response.winner)
+                .fadeIn();
+        }
     });
 });
 

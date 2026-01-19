@@ -43,6 +43,14 @@ public static class ChessboardService
 
     public static string GetFen() => Game.GetFen();
 
+    public static string Surrender()
+    {
+        if (Game.WhoseTurn == Player.White)
+            return "Black";
+        else
+            return "White";
+    }
+
     public static void Reset()
     {
         Game = new ChessGame();

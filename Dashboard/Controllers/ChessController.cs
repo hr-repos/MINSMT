@@ -41,6 +41,13 @@ public class ChessController : Controller
     }
 
     [HttpPost]
+    public IActionResult Surrender()
+    {
+        string winner = ChessboardService.Surrender();
+        return Json(new { winner = winner });
+    }
+
+    [HttpPost]
     public IActionResult Reset()
     {
         ChessboardService.Reset();
