@@ -16,3 +16,8 @@ bool Timer::checkTimer() {
     }
     return false;
 }
+
+/// @brief Resets the timer to start counting from the current time
+void Timer::resetTimer() {
+    this->lastCheckTime = millis();
+}

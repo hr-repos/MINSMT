@@ -4,6 +4,7 @@
 #include <PubSubClient.h>
 #include "multiplexer.h"
 #include "lcd.h"
+#include "timer.h"
 
 #define BOARDWIDTHHIGHT 8
 #define MULTIPLEXERS_COUNT 4
@@ -24,10 +25,13 @@ enum gameState {
     FINISHED
 };
 
-extern bool boardPresence[BOARDWIDTHHIGHT][BOARDWIDTHHIGHT];
+extern bool lastState[BOARDWIDTHHIGHT][BOARDWIDTHHIGHT];
 extern Multiplexer* multiPlexers[MULTIPLEXERS_COUNT];  
 extern WiFiClient espClient;                          
 extern PubSubClient client;   
-extern int playCode;   
+extern int playCode; 
+extern String playcodeString;  
 extern LcdModule lcd;   
 extern gameState currentGameState;
+extern Timer timerOpponentCheck;
+extern uint8_t pinInactiveOpponentIndicator;

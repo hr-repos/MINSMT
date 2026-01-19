@@ -47,14 +47,27 @@ void callback(char* topic, byte* payload, unsigned int length)
     // for debugging
     Serial.printf("Message arrived [%s] %s\n", topic, message);
 
-    if (strcmp(topic, "topic1") == 0)
+    if (strcmp(topic, (playcodeString + "/move/external").c_str() ) == 0)
     {
-        Serial.println("message received on topic1");
+        Serial.println("The opponent has made a move: " + String(message));
+        
+    }
+
+    if (strcmp(topic, (playcodeString + "/alive/external").c_str() ) == 0)
+    {
+        Serial.println("The opponent is alive: " + String(message));
+        timerOpponentCheck.resetTimer();
+        digitalWrite(pinInactiveOpponentIndicator, LOW); // Test action
     }
 }
 
 void sendMove() {
     // Placeholder for sending a move via MQTT
     const char* moveMessage = "e2e4"; // Example move
-    client.publish(String(playCode).c_str(), moveMessage);
+    Serial.printf("Sending move: %s\n", moveMessage);
+    client.publish((playcodeString + "/move/board").c_str(), moveMessage);
+}
+
+void sendMessage(const char* topic, const char* message) {
+    client.publish(topic, message);
 }

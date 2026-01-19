@@ -12,6 +12,7 @@ class Timer
     public:
         Timer(int delayInMs);
         bool checkTimer();
+        void resetTimer();
 };
 
 #endif
