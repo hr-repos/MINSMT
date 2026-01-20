@@ -460,6 +460,45 @@ body{
   padding-left: 18px;
 }
 
+.cc-promo{
+  position: absolute;
+  display: none;
+  z-index: 60;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 2px solid #7aa35a;
+  background: #1b1b1b;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+}
+
+.cc-promo button{
+  all: unset;
+  display: block;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  cursor: pointer;
+  background: #f1f1f1;
+  border-bottom: 1px solid rgba(0,0,0,0.15);
+}
+
+.cc-promo button:last-child{
+  border-bottom: none;
+}
+
+.cc-promo button:hover{
+  filter: brightness(0.95);
+}
+
+.cc-promo img{
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: contain;
+  padding: 8%;
+  box-sizing: border-box;
+}
+
+
 .cc-gameover{
   background: rgba(255, 0, 0, 0.12);
   border: 1px solid rgba(255, 0, 0, 0.25);

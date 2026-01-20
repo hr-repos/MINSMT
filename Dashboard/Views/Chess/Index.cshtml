@@ -58,7 +58,7 @@
 
                         </div>
                             <div id="gameOverMessage" class="cc-gameover" style="display:none;"></div>
-
+                            <div id="promotionPicker" class="cc-promo" style="display:none;"></div>
                     </div>
 
                 </section>
@@ -177,6 +177,8 @@
     var board = null;
     var lastFen = null;
 
+    var pendingPromotion = null;
+
     function createBoard(draggable, fen, orientation) {
         if (board) {
             board.destroy();
@@ -189,38 +191,60 @@
             pieceTheme: '/lib/chessboardjs/img/chesspieces/wikipedia/{piece}.png',
             onDrop: onDrop
         });
+
+        setTimeout(() => board.resize(), 0);
+        setTimeout(() => board.resize(), 250);
     }
 
     function showGameOver(message, type) {
+        $("#promotionPicker").hide();
+
         $("#gameOverMessage")
             .removeClass("win lose")
             .addClass(type)
             .text(message)
             .fadeIn();
-        createBoard(false, board.fen(), board.orientation());
+
+        var fen = (board && typeof board.fen === "function") ? board.fen() : lastFen;
+        var ori = (board && typeof board.orientation === "function") ? board.orientation() : "white";
+        createBoard(false, fen, ori);
     }
 
-    setTimeout(() => board.resize(), 0);
-    setTimeout(() => board.resize(), 250);
-
     $(window).on('resize', function () {
-        board.resize();
+        if (board) board.resize();
     });
 
-    function onDrop(source, target, piece, newPos, oldPos, orientation) {
+    function isPromotionMove(piece, target) {
+        if (!piece || piece.length < 2) return false;
+
+        var color = piece[0];
+        var type = piece[1];
+        if (type !== 'P') return false;
+
+        var rank = target[1];
+        return (color === 'w' && rank === '8') || (color === 'b' && rank === '1');
+    }
+
+    function sendMove(from, to, promotion, oldPos) {
+        var payload = { from: from, to: to };
+        if (promotion) payload.promotion = promotion;
+
         $.ajax({
             url: '/Chess/Move',
             method: 'POST',
             contentType: 'application/json',
-            data: JSON.stringify({ from: source, to: target }),
+            data: JSON.stringify(payload),
 
             success: function (response) {
-                if (!response.valid) {
-                    board.position(oldPos);
+                if (!response || !response.valid) {
+                    if (oldPos) board.position(oldPos);
                     return;
                 }
 
-                board.position(response.fen);
+                if (response.fen) {
+                    lastFen = response.fen;
+                    board.position(response.fen);
+                }
 
                 if (response.winner) {
                     showGameOver("Checkmate! Winner: " + response.winner, "win");
@@ -228,12 +252,88 @@
             },
 
             error: function () {
-                board.position(oldPos);
+                if (oldPos) board.position(oldPos);
             }
         });
     }
 
+function showPromotionPicker(piece, targetSquare, onPick) {
+    var picker = $("#promotionPicker");
+    picker.empty();
+
+    var color = piece[0];
+    var choices = ["q", "n", "r", "b"];
+
+    for (var i = 0; i < choices.length; i++) {
+        (function (c) {
+            var imgPiece = color + c.toUpperCase();
+            var imgUrl = "/lib/chessboardjs/img/chesspieces/wikipedia/" + imgPiece + ".png";
+
+            var btn = $('<button type="button"></button>');
+            btn.append('<img src="' + imgUrl + '" alt="' + imgPiece + '">');
+            btn.on("click", function () {
+                picker.hide();
+                onPick(c);
+            });
+
+            picker.append(btn);
+        })(choices[i]);
+    }
+
+    var squareEl = $('#board .square-' + targetSquare);
+    var wrap = $(".cc-board-wrap");
+
+    if (squareEl.length === 0 || wrap.length === 0) {
+        picker.hide();
+        return;
+    }
+
+    var wrapOffset = wrap.offset();
+    var sqOffset = squareEl.offset();
+    var sqSize = squareEl.outerWidth();
+
+    picker.css({ width: sqSize + "px" });
+
+    var left = (sqOffset.left - wrapOffset.left + sqSize + 6);
+    var top = (sqOffset.top - wrapOffset.top);
+
+    var wrapW = wrap.innerWidth();
+    var pickerW = picker.outerWidth();
+
+    if (left + pickerW > wrapW - 6) {
+        left = (sqOffset.left - wrapOffset.left - pickerW - 6);
+    }
+
+    picker.css({
+        left: left + "px",
+        top: top + "px",
+        transform: "none"
+    });
+
+    picker.show();
+}
+
+    function onDrop(source, target, piece, newPos, oldPos, orientation) {
+        $("#promotionPicker").hide();
+
+        if (isPromotionMove(piece, target)) {
+            pendingPromotion = { from: source, to: target, piece: piece, oldPos: oldPos };
+
+            showPromotionPicker(piece, target, function (promo) {
+                if (!pendingPromotion) return;
+                sendMove(pendingPromotion.from, pendingPromotion.to, promo, pendingPromotion.oldPos);
+                pendingPromotion = null;
+            });
+
+            return 'snapback';
+        }
+
+        sendMove(source, target, null, oldPos);
+    }
+
     $('#startBtn').click(function () {
+        $("#promotionPicker").hide();
+
         $.ajax({
             url: '/Chess/StartGame',
             method: 'POST',
@@ -244,14 +344,19 @@
                 difficulty: selectedDifficulty
             }),
             success: function (response) {
+                if (!response) return;
+
                 createBoard(true, response.fen, response.orientation);
-                $("#gameOverMessage").hide().text("");
+                lastFen = response.fen;
+                $("#gameOverMessage").hide().removeClass("win lose").text("");
             }
         });
     });
 
     $('#resignBtn').click(function () {
-    $.post('/Chess/Resign', function (response) {
+        $("#promotionPicker").hide();
+
+        $.post('/Chess/Resign', function (response) {
             if (response && response.winner) {
                 showGameOver("You resigned! Winner: " + response.winner, "lose");
             } else {
@@ -261,6 +366,8 @@
     });
 
     setInterval(() => {
+        if (!board) return;
+
         $.get('/Chess/State', function (response) {
             if (response && response.fen && response.fen !== lastFen) {
                 lastFen = response.fen;
@@ -268,6 +375,7 @@
             }
         });
     }, 1000);
+
     createBoard(false, '@ViewBag.FEN', 'white');
 </script>
 
