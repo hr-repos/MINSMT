@@ -72,7 +72,10 @@
                     <div class="cc-mode-select">
                         <button class="cc-mode-btn active" data-mode="player" type="button">Player</button>
                         <button class="cc-mode-btn" data-mode="cpu" type="button">CPU</button>
-
+                    </div>
+                    <div class="cc-side-select" style="display:none;">
+                        <button class="cc-side-btn active" data-side="white">White</button>
+                        <button class="cc-side-btn" data-side="black">Black</button>
                     </div>
 
                 <div class="cc-difficulty-select" style="display:none;">
@@ -121,12 +124,21 @@
 <script>
     let selectedMode = "player";
     let selectedDifficulty = "beginner";
+    let selectedSide = "white";
 
     function updateDifficultyVisibility() {
         if (selectedMode === "cpu") {
             $('.cc-difficulty-select').fadeIn(120);
         } else {
             $('.cc-difficulty-select').fadeOut(120);
+        }
+    }
+
+    function updateSideVisibility() {
+        if (selectedMode === "player") {
+            $('.cc-side-select').fadeIn(120);
+        } else {
+            $('.cc-side-select').fadeOut(120);
         }
     }
 
@@ -146,6 +158,12 @@
 
         selectedDifficulty = $(this).data('level');
         console.log("Selected difficulty:", selectedDifficulty);
+    });
+
+    $('.cc-side-btn').click(function () {
+        $('.cc-side-btn').removeClass('active');
+        $(this).addClass('active');
+        selectedSide = $(this).data('side');
     });
 
     updateDifficultyVisibility();
@@ -204,9 +222,21 @@
     }
 
     $('#startBtn').click(function () {
-        $.post('/Chess/Reset', function (response) {
-            board.position(response.fen);
-            $("#gameOverMessage").hide().removeClass("win lose").text("");
+        $.ajax({
+            url: '/Chess/StartGame',
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({
+                mode: selectedMode,
+                side: selectedSide,
+                difficulty: selectedDifficulty
+            }),
+            success: function (response) {
+                board.orientation(response.orientation);
+                board.position(response.fen);
+                board.draggable = true;
+                $("#gameOverMessage").hide().text("");
+            }
         });
     });
 

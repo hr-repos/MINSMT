@@ -3,14 +3,30 @@ using ChessDotNet;
 public static class ChessboardService
 {
     public static ChessGame Game { get; private set; } = new ChessGame();
+
+    public static bool GameStarted { get; set; } = false;
+    public static GameMode Mode { get; set; } = GameMode.HumanVsHuman;
+    public static PlayerSide HumanSide { get; set; } = PlayerSide.White;
+
     private static StockfishEngineService engine = new StockfishEngineService("StockfishEngine/stockfish-windows-x86-64-avx2.exe");
 
     public static bool ApplyPhysicalMove(string from, string to)
     {
+        if (!GameStarted)
+            return false;
+
         var move = new Move(from, to, Game.WhoseTurn);
 
         if (!Game.IsValidMove(move))
             return false;
+
+        if (Mode == GameMode.HumanVsAI)
+        {
+            if ((HumanSide == PlayerSide.White && Game.WhoseTurn == Player.Black) || (HumanSide == PlayerSide.Black && Game.WhoseTurn == Player.White))
+            {
+                return false;
+            }
+        }
 
         Game.MakeMove(move, true);
         return true;
@@ -18,6 +34,12 @@ public static class ChessboardService
 
     public static async Task<string> MakeAIMoveAsync()
     {
+        if (!GameStarted)
+        return null;
+
+        if (Mode != GameMode.HumanVsAI)
+            return null;
+
         if (Game.WhoseTurn != Player.Black)
             return null;
 
