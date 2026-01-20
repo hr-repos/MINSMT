@@ -68,7 +68,7 @@
 
                     <div class="cc-card">
                         <button id="startBtn" class="cc-primary" type="button">Start Game</button>
-                        <button id="surrenderBtn" class="cc-danger" type="button">Surrender</button>
+                        <button id="resignBtn" class="cc-danger" type="button">Resign</button>
                     <div class="cc-mode-select">
                         <button class="cc-mode-btn active" data-mode="player" type="button">Player</button>
                         <button class="cc-mode-btn" data-mode="cpu" type="button">CPU</button>
@@ -204,11 +204,11 @@
         });
     });
 
-    $('#surrenderBtn').click(function () {
-    $.post('/Chess/Surrender', function (response) {
+    $('#resignBtn').click(function () {
+    $.post('/Chess/Resign', function (response) {
         if (response.winner) {
             $("#gameOverMessage")
-                .text("You surrendered! Winner: " + response.winner)
+                .text("You resigned! Winner: " + response.winner)
                 .fadeIn();
         }
     });

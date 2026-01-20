@@ -43,7 +43,7 @@ public static class ChessboardService
 
     public static string GetFen() => Game.GetFen();
 
-    public static string Surrender()
+    public static string Resign()
     {
         if (Game.WhoseTurn == Player.White)
             return "Black";
@@ -56,10 +56,14 @@ public static class ChessboardService
         Game = new ChessGame();
     }
 
-    public static string GetWinner()
+    public static string GetGameResult()
     {
         if (Game.IsCheckmated(Player.White)) return "Black";
         if (Game.IsCheckmated(Player.Black)) return "White";
+
+        if (Game.IsStalemated(Player.White)) return "Draw";
+        if (Game.IsStalemated(Player.Black)) return "Draw";
+
         return null;
     }
 }

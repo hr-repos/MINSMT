@@ -23,13 +23,13 @@ public class ChessController : Controller
         bool success = ChessboardService.ApplyPhysicalMove(req.From, req.To);
 
         if (!success)
-            return Json(new { valid = false, fen = ChessboardService.GetFen(), winner = ChessboardService.GetWinner() });
+            return Json(new { valid = false, fen = ChessboardService.GetFen(), winner = ChessboardService.GetGameResult() });
 
         // Make AI move if applicable
         string aiMove = await ChessboardService.MakeAIMoveAsync();
 
         // Check for winner
-        string winner = ChessboardService.GetWinner();
+        string winner = ChessboardService.GetGameResult();
 
         return Json(new
         {
@@ -41,9 +41,9 @@ public class ChessController : Controller
     }
 
     [HttpPost]
-    public IActionResult Surrender()
+    public IActionResult Resign()
     {
-        string winner = ChessboardService.Surrender();
+        string winner = ChessboardService.Resign();
         return Json(new { winner = winner });
     }
 
