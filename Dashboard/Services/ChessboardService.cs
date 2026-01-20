@@ -45,9 +45,6 @@ public static class ChessboardService
         if (Mode != GameMode.HumanVsAI)
             return null;
 
-        if (Game.WhoseTurn != Player.Black)
-            return null;
-
         string fen = Game.GetFen();
         string best = await engine.GetMove(fen); // e.g., "e7e5"
 
@@ -57,7 +54,7 @@ public static class ChessboardService
         string from = best.Substring(0, 2);
         string to   = best.Substring(2, 2);
 
-        var aiMove = new Move(from, to, Player.Black);
+        var aiMove = new Move(from, to, Game.WhoseTurn);
 
         if (Game.IsValidMove(aiMove))
         {
