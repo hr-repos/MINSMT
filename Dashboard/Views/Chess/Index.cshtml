@@ -162,6 +162,14 @@
         onDrop: onDrop
     });
 
+    function showGameOver(message, type) {
+        $("#gameOverMessage")
+            .removeClass("win lose")
+            .addClass(type)
+            .text(message)
+            .fadeIn();
+    }
+
     setTimeout(() => board.resize(), 0);
     setTimeout(() => board.resize(), 250);
 
@@ -185,9 +193,7 @@
                 board.position(response.fen);
 
                 if (response.winner) {
-                    $("#gameOverMessage")
-                        .text("Checkmate! Winner: " + response.winner)
-                        .fadeIn();
+                    showGameOver("Checkmate! Winner: " + response.winner, "win");
                 }
             },
 
@@ -200,19 +206,19 @@
     $('#startBtn').click(function () {
         $.post('/Chess/Reset', function (response) {
             board.position(response.fen);
-            $("#gameOverMessage").hide().text("");
+            $("#gameOverMessage").hide().removeClass("win lose").text("");
         });
     });
 
     $('#resignBtn').click(function () {
     $.post('/Chess/Resign', function (response) {
-        if (response.winner) {
-            $("#gameOverMessage")
-                .text("You resigned! Winner: " + response.winner)
-                .fadeIn();
-        }
+            if (response && response.winner) {
+                showGameOver("You resigned! Winner: " + response.winner, "lose");
+            } else {
+                showGameOver("You resigned!", "lose");
+            }
+        });
     });
-});
 
     setInterval(() => {
         $.get('/Chess/State', function (response) {
@@ -223,3 +229,4 @@
         });
     }, 1000);
 </script>
+
