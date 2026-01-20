@@ -20,7 +20,7 @@ public class StockfishEngineService
         engineProcess.StandardOutput.ReadLine();
 
         engineProcess.StandardInput.WriteLine("uci");
-        engineProcess.StandardInput.WriteLine("setoption name Skill Level value 20");
+        engineProcess.StandardInput.WriteLine("setoption name Skill Level value 0");
     }
 
     public async Task<string> GetMove(string fen, int depth = 15)

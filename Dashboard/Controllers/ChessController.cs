@@ -14,36 +14,42 @@ public class ChessController : Controller
     [HttpGet]
     public IActionResult State()
     {
-        return Json(new { fen = ChessboardService.GetFen() });
+        return Json(new
+        {
+            fen = ChessboardService.GetFen(),
+            winner = ChessboardService.GetGameResult(),
+            checkSquare = ChessboardService.GetCheckSquare(),
+            checkAttackers = ChessboardService.GetCheckAttackers()
+        });
     }
 
     [HttpPost]
-public async Task<IActionResult> StartGame([FromBody] StartGameRequest settings)
-{
-    ChessboardService.Reset();
-
-    ChessboardService.Mode =
-        settings.Mode == "cpu" ? GameMode.HumanVsAI : GameMode.HumanVsHuman;
-
-    ChessboardService.HumanSide =
-        settings.Side == "black" ? PlayerSide.Black : PlayerSide.White;
-
-    ChessboardService.GameStarted = true;
-
-    // If playing vs AI and human chose Black → AI moves first
-    if (ChessboardService.Mode == GameMode.HumanVsAI &&
-        ChessboardService.HumanSide == PlayerSide.Black)
+    public async Task<IActionResult> StartGame([FromBody] StartGameRequest settings)
     {
-        await ChessboardService.MakeAIMoveAsync();
+        ChessboardService.Reset();
+
+        ChessboardService.Mode =
+            settings.Mode == "cpu" ? GameMode.HumanVsAI : GameMode.HumanVsHuman;
+
+        ChessboardService.HumanSide =
+            settings.Side == "black" ? PlayerSide.Black : PlayerSide.White;
+
+        ChessboardService.GameStarted = true;
+
+        if (ChessboardService.Mode == GameMode.HumanVsAI &&
+            ChessboardService.HumanSide == PlayerSide.Black)
+        {
+            await ChessboardService.MakeAIMoveAsync();
+        }
+
+        return Json(new
+        {
+            fen = ChessboardService.GetFen(),
+            orientation = ChessboardService.HumanSide == PlayerSide.White ? "white" : "black",
+            checkSquare = ChessboardService.GetCheckSquare(),
+            checkAttackers = ChessboardService.GetCheckAttackers()
+        });
     }
-
-    return Json(new
-    {
-        fen = ChessboardService.GetFen(),
-        orientation = ChessboardService.HumanSide == PlayerSide.White ? "white" : "black"
-    });
-}
-
 
     [HttpPost]
     public async Task<IActionResult> Move([FromBody] MoveRequest move)
@@ -51,12 +57,23 @@ public async Task<IActionResult> StartGame([FromBody] StartGameRequest settings)
         bool success = ChessboardService.ApplyPhysicalMove(move.From, move.To, move.Promotion);
 
         if (!success)
-            return Json(new { valid = false, fen = ChessboardService.GetFen(), winner = ChessboardService.GetGameResult() });
+            return Json(new
+            {
+                valid = false,
+                fen = ChessboardService.GetFen(),
+                winner = ChessboardService.GetGameResult(),
+                checkSquare = ChessboardService.GetCheckSquare(),
+                checkAttackers = ChessboardService.GetCheckAttackers()
+            });
 
-        // Make AI move if applicable
-        string aiMove = await ChessboardService.MakeAIMoveAsync();
+        string winnerBeforeAi = ChessboardService.GetGameResult();
+        string aiMove = null;
 
-        // Check for winner
+        if (winnerBeforeAi == null)
+        {
+            aiMove = await ChessboardService.MakeAIMoveAsync();
+        }
+
         string winner = ChessboardService.GetGameResult();
 
         return Json(new
@@ -64,7 +81,9 @@ public async Task<IActionResult> StartGame([FromBody] StartGameRequest settings)
             valid = true,
             fen = ChessboardService.GetFen(),
             winner = winner,
-            aiMove = aiMove
+            aiMove = aiMove,
+            checkSquare = ChessboardService.GetCheckSquare(),
+            checkAttackers = ChessboardService.GetCheckAttackers()
         });
     }
 
@@ -72,26 +91,38 @@ public async Task<IActionResult> StartGame([FromBody] StartGameRequest settings)
     public IActionResult Resign()
     {
         string winner = ChessboardService.Resign();
-        return Json(new { winner = winner });
+        return Json(new
+        {
+            winner = winner,
+            fen = ChessboardService.GetFen(),
+            checkSquare = ChessboardService.GetCheckSquare(),
+            checkAttackers = ChessboardService.GetCheckAttackers()
+        });
     }
 
     [HttpPost]
     public IActionResult Reset()
     {
         ChessboardService.Reset();
-        return Json(new { fen = ChessboardService.GetFen() });
+        return Json(new
+        {
+            fen = ChessboardService.GetFen(),
+            winner = ChessboardService.GetGameResult(),
+            checkSquare = ChessboardService.GetCheckSquare(),
+            checkAttackers = ChessboardService.GetCheckAttackers()
+        });
     }
 }
 
 public class StartGameRequest
 {
-    public string Mode { get; set; } // vs human or vs ai
-    public string Side { get; set; } // start as white or black
+    public string Mode { get; set; }
+    public string Side { get; set; }
 }
 
 public class MoveRequest
 {
     public string From { get; set; }
     public string To { get; set; }
-    public char? Promotion { get; set; } // 'q', 'r', 'b', 'n'
+    public char? Promotion { get; set; }
 }
