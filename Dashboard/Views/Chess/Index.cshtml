@@ -73,10 +73,6 @@
                         <button class="cc-mode-btn active" data-mode="player" type="button">Player</button>
                         <button class="cc-mode-btn" data-mode="cpu" type="button">CPU</button>
                     </div>
-                    <div class="cc-side-select" style="display:none;">
-                        <button class="cc-side-btn active" data-side="white">White</button>
-                        <button class="cc-side-btn" data-side="black">Black</button>
-                    </div>
 
                 <div class="cc-difficulty-select" style="display:none;">
                     <button class="cc-difficulty-btn active" data-level="beginner" type="button">Beginner</button>
@@ -84,6 +80,10 @@
                     <button class="cc-difficulty-btn" data-level="expert" type="button">Expert</button>
                     <button class="cc-difficulty-btn" data-level="master" type="button">Master</button>
                 </div>
+                <div class="cc-side-select" style="display:none;">
+                        <button class="cc-side-btn active" data-side="white">White</button>
+                        <button class="cc-side-btn" data-side="black">Black</button>
+                    </div>
 
 
                             <!-- Time selector -->
@@ -135,7 +135,7 @@
     }
 
     function updateSideVisibility() {
-        if (selectedMode === "player") {
+        if (selectedMode === "cpu") {
             $('.cc-side-select').fadeIn(120);
         } else {
             $('.cc-side-select').fadeOut(120);
@@ -148,6 +148,7 @@
 
         selectedMode = $(this).data('mode');
         updateDifficultyVisibility();
+        updateSideVisibility();
 
         console.log("Selected mode:", selectedMode);
     });
@@ -164,9 +165,11 @@
         $('.cc-side-btn').removeClass('active');
         $(this).addClass('active');
         selectedSide = $(this).data('side');
+        console.log("Selected side:", selectedSide);
     });
 
     updateDifficultyVisibility();
+    updateSideVisibility();
 </script>
 
 

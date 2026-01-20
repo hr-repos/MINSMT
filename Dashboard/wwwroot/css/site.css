@@ -365,6 +365,37 @@ body{
   box-shadow: 0 0 0 2px rgba(143,209,90,0.35), inset 0 1px 0 rgba(255,255,255,0.25);
 }
 
+
+.cc-side-select{
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.cc-side-btn{
+  flex: 1;
+  background: linear-gradient(180deg, #2b2b2b, #1f1f1f);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 10px 0;
+  color: #e0e0e0;
+  font-size: 15px;
+  font-weight: 900;
+  cursor: pointer;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.05);
+  transition: background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.cc-side-btn:hover{
+  background: linear-gradient(180deg, #333, #242424);
+}
+
+.cc-side-btn.active{
+  background: linear-gradient(180deg, #6fbf3f, #5aa532);
+  color: #ffffff;
+  border-color: #8fd15a;
+  box-shadow: 0 0 0 2px rgba(143,209,90,0.35), inset 0 1px 0 rgba(255,255,255,0.25);
+}
+
 .cc-difficulty-select{
   display: flex;
   flex-wrap: wrap;
