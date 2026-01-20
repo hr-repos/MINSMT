@@ -225,61 +225,68 @@
         return (color === 'w' && rank === '8') || (color === 'b' && rank === '1');
     }
 
-    function showPromotionPicker(piece, targetSquare, onPick) {
-        var picker = $("#promotionPicker");
-        picker.empty();
+function showPromotionPicker(piece, targetSquare, onPick) {
+    var picker = $("#promotionPicker");
+    picker.empty();
 
-        var color = piece[0];
-        var choices = ["q", "n", "r", "b"];
+    var color = piece[0];
+    var choices = ["q", "n", "r", "b"];
 
-        for (var i = 0; i < choices.length; i++) {
-            (function (c) {
-                var imgPiece = color + c.toUpperCase();
-                var imgUrl = "/lib/chessboardjs/img/chesspieces/wikipedia/" + imgPiece + ".png";
+    for (var i = 0; i < choices.length; i++) {
+        (function (c) {
+            var imgPiece = color + c.toUpperCase();
+            var imgUrl = "/lib/chessboardjs/img/chesspieces/wikipedia/" + imgPiece + ".png";
 
-                var btn = $('<button type="button"></button>');
-                btn.append('<img src="' + imgUrl + '" alt="' + imgPiece + '">');
-                btn.on("click", function () {
-                    picker.hide();
-                    onPick(c);
-                });
+            var btn = $('<button type="button"></button>');
+            btn.append('<img src="' + imgUrl + '" alt="' + imgPiece + '">');
+            btn.on("click", function () {
+                picker.hide();
+                onPick(c);
+            });
 
-                picker.append(btn);
-            })(choices[i]);
-        }
-
-        var squareEl = $('#board .square-' + targetSquare);
-        var wrap = $(".cc-board-wrap");
-
-        if (squareEl.length === 0 || wrap.length === 0) {
-            picker.hide();
-            return;
-        }
-
-        var wrapOffset = wrap.offset();
-        var sqOffset = squareEl.offset();
-        var sqSize = squareEl.outerWidth();
-
-        picker.css({ width: sqSize + "px" });
-
-        var left = (sqOffset.left - wrapOffset.left + sqSize + 6);
-        var top = (sqOffset.top - wrapOffset.top);
-
-        var wrapW = wrap.innerWidth();
-        var pickerW = picker.outerWidth();
-
-        if (left + pickerW > wrapW - 6) {
-            left = (sqOffset.left - wrapOffset.left - pickerW - 6);
-        }
-
-        picker.css({
-            left: left + "px",
-            top: top + "px",
-            transform: "none"
-        });
-
-        picker.show();
+            picker.append(btn);
+        })(choices[i]);
     }
+
+    var squareEl = $('#board .square-' + targetSquare);
+    var wrap = $(".cc-board-wrap");
+
+    if (squareEl.length === 0 || wrap.length === 0) {
+        picker.hide();
+        return;
+    }
+
+    var wrapOffset = wrap.offset();
+    var sqOffset = squareEl.offset();
+    var sqSize = squareEl.outerWidth();
+
+    picker.css({ width: sqSize + "px", transform: "none" }).show();
+
+    var wrapW = wrap.innerWidth();
+    var wrapH = wrap.innerHeight();
+    var pickerW = picker.outerWidth();
+    var pickerH = picker.outerHeight();
+
+    var left = (sqOffset.left - wrapOffset.left + sqSize + 6);
+    var top = (sqOffset.top - wrapOffset.top);
+
+    // Flip left if no space on right
+    if (left + pickerW > wrapW - 6) {
+        left = (sqOffset.left - wrapOffset.left - pickerW - 6);
+    }
+    if (left < 6) left = 6;
+
+    // Flip upward if no space below
+    if (top + pickerH > wrapH - 6) {
+        top = top - pickerH + sqSize;
+    }
+    if (top < 6) top = 6;
+
+    picker.css({
+        left: left + "px",
+        top: top + "px"
+    });
+}
 
     function onDrop(source, target, piece, newPos, oldPos, orientation) {
         $("#promotionPicker").hide();
