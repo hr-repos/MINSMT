@@ -205,10 +205,13 @@
             .text(message)
             .fadeIn();
 
+        $('.cc-mode-btn').removeClass('disabled');
+
         var fen = (board && typeof board.fen === "function") ? board.fen() : lastFen;
         var ori = (board && typeof board.orientation === "function") ? board.orientation() : "white";
         createBoard(false, fen, ori);
     }
+
 
     $(window).on('resize', function () {
         if (board) board.resize();
@@ -270,13 +273,11 @@ function showPromotionPicker(piece, targetSquare, onPick) {
     var left = (sqOffset.left - wrapOffset.left + sqSize + 6);
     var top = (sqOffset.top - wrapOffset.top);
 
-    // Flip left if no space on right
     if (left + pickerW > wrapW - 6) {
         left = (sqOffset.left - wrapOffset.left - pickerW - 6);
     }
     if (left < 6) left = 6;
 
-    // Flip upward if no space below
     if (top + pickerH > wrapH - 6) {
         top = top - pickerH + sqSize;
     }
@@ -291,19 +292,16 @@ function showPromotionPicker(piece, targetSquare, onPick) {
     function onDrop(source, target, piece, newPos, oldPos, orientation) {
         $("#promotionPicker").hide();
 
-         // Check if this move requires promotion
         if (isPromotionMove(piece, target)) {
-            // Store move temporarily
             pendingPromotion = { from: source, to: target, oldPos: oldPos };
 
-            // Show picker and wait for user choice
             showPromotionPicker(piece, target, function (promo) {
                 if (!pendingPromotion) {
-                    board.position(oldPos); // fallback
+                    board.position(oldPos);
                     return;
                 }
 
-                // Send move with promotion to backend
+
                 $.ajax({
                     url: '/Chess/Move',
                     method: 'POST',
@@ -334,10 +332,10 @@ function showPromotionPicker(piece, targetSquare, onPick) {
                 });
             });
 
-            return; // stop default move handling
+            return;
         }
 
-        // Normal move (no promotion)
+
         $.ajax({
             url: '/Chess/Move',
             method: 'POST',
@@ -361,27 +359,29 @@ function showPromotionPicker(piece, targetSquare, onPick) {
         });
     }
 
-    $('#startBtn').click(function () {
-        $("#promotionPicker").hide();
+$('#startBtn').click(function () {
+    $("#promotionPicker").hide();
 
-        $.ajax({
-            url: '/Chess/StartGame',
-            method: 'POST',
-            contentType: 'application/json',
-            data: JSON.stringify({
-                mode: selectedMode,
-                side: selectedSide,
-                difficulty: selectedDifficulty
-            }),
-            success: function (response) {
-                if (!response) return;
+    $.ajax({
+        url: '/Chess/StartGame',
+        method: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify({
+            mode: selectedMode,
+            side: selectedSide,
+            difficulty: selectedDifficulty
+        }),
+        success: function (response) {
+            if (!response) return;
 
-                createBoard(true, response.fen, response.orientation);
-                lastFen = response.fen;
-                $("#gameOverMessage").hide().removeClass("win lose").text("");
-            }
-        });
+            createBoard(true, response.fen, response.orientation);
+            lastFen = response.fen;
+            $("#gameOverMessage").hide().removeClass("win lose").text("");
+            $('.cc-mode-btn').addClass('disabled');
+        }
     });
+});
+
 
     $('#resignBtn').click(function () {
         $("#promotionPicker").hide();
