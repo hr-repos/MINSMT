@@ -225,110 +225,133 @@
         return (color === 'w' && rank === '8') || (color === 'b' && rank === '1');
     }
 
-    function sendMove(from, to, promotion, oldPos) {
-        var payload = { from: from, to: to };
-        if (promotion) payload.promotion = promotion;
+    function showPromotionPicker(piece, targetSquare, onPick) {
+        var picker = $("#promotionPicker");
+        picker.empty();
 
-        $.ajax({
-            url: '/Chess/Move',
-            method: 'POST',
-            contentType: 'application/json',
-            data: JSON.stringify(payload),
+        var color = piece[0];
+        var choices = ["q", "n", "r", "b"];
 
-            success: function (response) {
-                if (!response || !response.valid) {
-                    if (oldPos) board.position(oldPos);
-                    return;
-                }
+        for (var i = 0; i < choices.length; i++) {
+            (function (c) {
+                var imgPiece = color + c.toUpperCase();
+                var imgUrl = "/lib/chessboardjs/img/chesspieces/wikipedia/" + imgPiece + ".png";
 
-                if (response.fen) {
-                    lastFen = response.fen;
-                    board.position(response.fen);
-                }
+                var btn = $('<button type="button"></button>');
+                btn.append('<img src="' + imgUrl + '" alt="' + imgPiece + '">');
+                btn.on("click", function () {
+                    picker.hide();
+                    onPick(c);
+                });
 
-                if (response.winner) {
-                    showGameOver("Checkmate! Winner: " + response.winner, "win");
-                }
-            },
+                picker.append(btn);
+            })(choices[i]);
+        }
 
-            error: function () {
-                if (oldPos) board.position(oldPos);
-            }
+        var squareEl = $('#board .square-' + targetSquare);
+        var wrap = $(".cc-board-wrap");
+
+        if (squareEl.length === 0 || wrap.length === 0) {
+            picker.hide();
+            return;
+        }
+
+        var wrapOffset = wrap.offset();
+        var sqOffset = squareEl.offset();
+        var sqSize = squareEl.outerWidth();
+
+        picker.css({ width: sqSize + "px" });
+
+        var left = (sqOffset.left - wrapOffset.left + sqSize + 6);
+        var top = (sqOffset.top - wrapOffset.top);
+
+        var wrapW = wrap.innerWidth();
+        var pickerW = picker.outerWidth();
+
+        if (left + pickerW > wrapW - 6) {
+            left = (sqOffset.left - wrapOffset.left - pickerW - 6);
+        }
+
+        picker.css({
+            left: left + "px",
+            top: top + "px",
+            transform: "none"
         });
+
+        picker.show();
     }
-
-function showPromotionPicker(piece, targetSquare, onPick) {
-    var picker = $("#promotionPicker");
-    picker.empty();
-
-    var color = piece[0];
-    var choices = ["q", "n", "r", "b"];
-
-    for (var i = 0; i < choices.length; i++) {
-        (function (c) {
-            var imgPiece = color + c.toUpperCase();
-            var imgUrl = "/lib/chessboardjs/img/chesspieces/wikipedia/" + imgPiece + ".png";
-
-            var btn = $('<button type="button"></button>');
-            btn.append('<img src="' + imgUrl + '" alt="' + imgPiece + '">');
-            btn.on("click", function () {
-                picker.hide();
-                onPick(c);
-            });
-
-            picker.append(btn);
-        })(choices[i]);
-    }
-
-    var squareEl = $('#board .square-' + targetSquare);
-    var wrap = $(".cc-board-wrap");
-
-    if (squareEl.length === 0 || wrap.length === 0) {
-        picker.hide();
-        return;
-    }
-
-    var wrapOffset = wrap.offset();
-    var sqOffset = squareEl.offset();
-    var sqSize = squareEl.outerWidth();
-
-    picker.css({ width: sqSize + "px" });
-
-    var left = (sqOffset.left - wrapOffset.left + sqSize + 6);
-    var top = (sqOffset.top - wrapOffset.top);
-
-    var wrapW = wrap.innerWidth();
-    var pickerW = picker.outerWidth();
-
-    if (left + pickerW > wrapW - 6) {
-        left = (sqOffset.left - wrapOffset.left - pickerW - 6);
-    }
-
-    picker.css({
-        left: left + "px",
-        top: top + "px",
-        transform: "none"
-    });
-
-    picker.show();
-}
 
     function onDrop(source, target, piece, newPos, oldPos, orientation) {
         $("#promotionPicker").hide();
 
+         // Check if this move requires promotion
         if (isPromotionMove(piece, target)) {
-            pendingPromotion = { from: source, to: target, piece: piece, oldPos: oldPos };
+            // Store move temporarily
+            pendingPromotion = { from: source, to: target, oldPos: oldPos };
 
+            // Show picker and wait for user choice
             showPromotionPicker(piece, target, function (promo) {
-                if (!pendingPromotion) return;
-                sendMove(pendingPromotion.from, pendingPromotion.to, promo, pendingPromotion.oldPos);
-                pendingPromotion = null;
+                if (!pendingPromotion) {
+                    board.position(oldPos); // fallback
+                    return;
+                }
+
+                // Send move with promotion to backend
+                $.ajax({
+                    url: '/Chess/Move',
+                    method: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({
+                        from: pendingPromotion.from,
+                        to: pendingPromotion.to,
+                        promotion: promo
+                    }),
+                    success: function (response) {
+                        if (!response.valid) {
+                            board.position(pendingPromotion.oldPos);
+                        } else {
+                            board.position(response.fen);
+                            lastFen = response.fen;
+
+                            if (response.winner) {
+                                showGameOver("Checkmate! Winner: " + response.winner, "win");
+                            }
+                        }
+
+                        pendingPromotion = null;
+                    },
+                    error: function () {
+                        board.position(pendingPromotion.oldPos);
+                        pendingPromotion = null;
+                    }
+                });
             });
 
-            return 'snapback';
+            return; // stop default move handling
         }
 
-        sendMove(source, target, null, oldPos);
+        // Normal move (no promotion)
+        $.ajax({
+            url: '/Chess/Move',
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({ from: source, to: target }),
+            success: function (response) {
+                if (!response.valid) {
+                    board.position(oldPos);
+                } else {
+                    board.position(response.fen);
+                    lastFen = response.fen;
+
+                    if (response.winner) {
+                        showGameOver("Checkmate! Winner: " + response.winner, "win");
+                    }
+                }
+            },
+            error: function () {
+                board.position(oldPos);
+            }
+        });
     }
 
     $('#startBtn').click(function () {

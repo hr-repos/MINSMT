@@ -10,12 +10,17 @@ public static class ChessboardService
 
     private static StockfishEngineService engine = new StockfishEngineService("StockfishEngine/stockfish-windows-x86-64-avx2.exe");
 
-    public static bool ApplyPhysicalMove(string from, string to)
+    public static bool ApplyPhysicalMove(string from, string to, char? promotion)
     {
         if (!GameStarted)
             return false;
 
-        var move = new Move(from, to, Game.WhoseTurn);
+        Move move;
+
+        if (promotion.HasValue)
+            move = new Move(from, to, Game.WhoseTurn, promotion.Value);
+        else
+            move = new Move(from, to, Game.WhoseTurn);
 
         if (!Game.IsValidMove(move))
             return false;

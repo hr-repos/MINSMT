@@ -34,7 +34,15 @@ public class MqttListener
     {
         var from = payload.Substring(0,2);
         var to = payload.Substring(2,2);
-        var success = ChessboardService.ApplyPhysicalMove(from, to);
+        char? promotion = null;
+
+        // If the payload has a 5th character, it's the promotion piece
+        if (payload.Length >= 5)
+        {
+            promotion = payload[4]; // 'q', 'r', 'b', 'n'
+        }
+
+        var success = ChessboardService.ApplyPhysicalMove(from, to, promotion);
 
         Console.WriteLine(success
             ? $"MOVE APPLIED: {from} -> {to}"

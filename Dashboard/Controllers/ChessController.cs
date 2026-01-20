@@ -48,7 +48,7 @@ public async Task<IActionResult> StartGame([FromBody] StartGameRequest settings)
     [HttpPost]
     public async Task<IActionResult> Move([FromBody] MoveRequest move)
     {
-        bool success = ChessboardService.ApplyPhysicalMove(move.From, move.To);
+        bool success = ChessboardService.ApplyPhysicalMove(move.From, move.To, move.Promotion);
 
         if (!success)
             return Json(new { valid = false, fen = ChessboardService.GetFen(), winner = ChessboardService.GetGameResult() });
@@ -93,4 +93,5 @@ public class MoveRequest
 {
     public string From { get; set; }
     public string To { get; set; }
+    public char? Promotion { get; set; } // 'q', 'r', 'b', 'n'
 }
