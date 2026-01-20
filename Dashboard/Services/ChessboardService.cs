@@ -62,6 +62,7 @@ public static class ChessboardService
         string to = best.Substring(2, 2);
 
         Move aiMove;
+        var aiMove = new Move(from, to, Game.WhoseTurn);
 
         if (best.Length >= 5)
         {
