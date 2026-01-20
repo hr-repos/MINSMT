@@ -174,14 +174,22 @@
 
 
 <script>
+    var board = null;
     var lastFen = null;
 
-    var board = Chessboard('board', {
-        draggable: true,
-        position: '@ViewBag.FEN',
-        pieceTheme: '/lib/chessboardjs/img/chesspieces/wikipedia/{piece}.png',
-        onDrop: onDrop
-    });
+    function createBoard(draggable, fen, orientation) {
+        if (board) {
+            board.destroy();
+        }
+
+        board = Chessboard('board', {
+            draggable: draggable,
+            position: fen,
+            orientation: orientation,
+            pieceTheme: '/lib/chessboardjs/img/chesspieces/wikipedia/{piece}.png',
+            onDrop: onDrop
+        });
+    }
 
     function showGameOver(message, type) {
         $("#gameOverMessage")
@@ -189,6 +197,7 @@
             .addClass(type)
             .text(message)
             .fadeIn();
+        createBoard(false, board.fen(), board.orientation());
     }
 
     setTimeout(() => board.resize(), 0);
@@ -235,9 +244,7 @@
                 difficulty: selectedDifficulty
             }),
             success: function (response) {
-                board.orientation(response.orientation);
-                board.position(response.fen);
-                board.draggable = true;
+                createBoard(true, response.fen, response.orientation);
                 $("#gameOverMessage").hide().text("");
             }
         });
@@ -261,5 +268,6 @@
             }
         });
     }, 1000);
+    createBoard(false, '@ViewBag.FEN', 'white');
 </script>
 
