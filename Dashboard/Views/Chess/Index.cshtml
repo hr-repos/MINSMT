@@ -284,7 +284,7 @@
         $("#promotionPicker").hide();
 
         $("#gameOverMessage")
-            .removeClass("win lose")
+            .removeClass("win lose draw")
             .addClass(type)
             .text(message)
             .fadeIn();
@@ -386,7 +386,11 @@
         applyCheckHighlight(response.checkSquare, response.checkAttackers);
 
         if (response.winner) {
-            showGameOver("Checkmate! Winner: " + response.winner, "win");
+            if (response.winner === "Draw") {
+                showGameOver("Draw", "draw");
+            } else {
+                showGameOver("Checkmate! Winner: " + response.winner, "win");
+            }
         }
     }
 
@@ -457,7 +461,7 @@
                 createBoard(true, response.fen, response.orientation);
                 lastFen = response.fen;
 
-                $("#gameOverMessage").hide().removeClass("win lose").text("");
+                $("#gameOverMessage").hide().removeClass("win lose draw").text("");
                 clearCheckHighlight();
 
                 $('.cc-mode-btn').addClass('disabled');

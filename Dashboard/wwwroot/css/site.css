@@ -158,6 +158,23 @@ body{
   box-shadow: 0 10px 30px rgba(0,0,0,0.6);
 }
 
+.cc-gameover.draw{
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: min(320px, 80%);
+  text-align: center;
+  z-index: 50;
+  padding: 14px 18px;
+  border-radius: 14px;
+
+  background: linear-gradient(180deg, #464d49, #464d49);
+  border: 1px solid #71766f;
+  color: #ffffff;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+}
+
 #gameOverMessage.cc-gameover.lose{
   position: absolute;
   left: 50%;
