@@ -280,14 +280,21 @@
         setTimeout(() => board.resize(), 250);
     }
 
-    function showGameOver(message, type) {
+    // UPDATED: now supports side-specific styling (white / black)
+    function showGameOver(message, type, side) {
         $("#promotionPicker").hide();
 
-        $("#gameOverMessage")
-            .removeClass("win lose draw")
-            .addClass(type)
-            .text(message)
-            .fadeIn();
+        var msg = $("#gameOverMessage");
+
+        msg
+            .removeClass("win lose draw white black")
+            .addClass(type);
+
+        if (side) {
+            msg.addClass(side); // "white" or "black"
+        }
+
+        msg.text(message).fadeIn();
 
         $('.cc-mode-btn').removeClass('disabled');
 
@@ -389,7 +396,9 @@
             if (response.winner === "Draw") {
                 showGameOver("Draw", "draw");
             } else {
-                showGameOver("Checkmate! Winner: " + response.winner, "win");
+                // UPDATED: pass winning side for color ("white" or "black")
+                var winnerSide = ("" + response.winner).toLowerCase(); // expects "White"/"Black"
+                showGameOver("Checkmate! Winner: " + response.winner, "win", winnerSide);
             }
         }
     }
@@ -461,7 +470,8 @@
                 createBoard(true, response.fen, response.orientation);
                 lastFen = response.fen;
 
-                $("#gameOverMessage").hide().removeClass("win lose draw").text("");
+                // UPDATED: also remove side classes
+                $("#gameOverMessage").hide().removeClass("win lose draw white black").text("");
                 clearCheckHighlight();
 
                 $('.cc-mode-btn').addClass('disabled');
