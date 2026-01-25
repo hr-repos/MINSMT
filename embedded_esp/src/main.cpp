@@ -1,9 +1,11 @@
 // Put external dependencies here:
+#include <string.h>
 #include <Arduino.h>
 #include <WiFi.h>
 #include <PubSubClient.h>
 
 // Put internal dependencies here:
+#include "logic.h"
 #include "config.h"
 #include "multiplexer.h"
 #include "functions.h"
@@ -86,7 +88,7 @@ void loop()
     {
         bool currentState[BOARDWIDTHHIGHT][BOARDWIDTHHIGHT];
         readBoardState(currentState);
-        String move = createMoveStr(lastState, currentState);
+        std::string move = createMoveStr(lastState, currentState);
         sendMessage((playcodeString + "/move/board").c_str(), move.c_str());
         memcpy(lastState, currentState, sizeof(lastState));
         currentGameState = WAITING_FOR_OPPONENT_MOVE;

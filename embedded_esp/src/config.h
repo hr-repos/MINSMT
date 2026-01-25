@@ -1,7 +1,9 @@
 #pragma once
 
+#include <Arduino.h>
 #include <WiFi.h>
 #include <PubSubClient.h>
+#include "config.h"
 #include "multiplexer.h"
 #include "lcd.h"
 #include "timer.h"
