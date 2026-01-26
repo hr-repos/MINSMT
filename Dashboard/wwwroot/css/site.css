@@ -305,6 +305,23 @@ body{
   box-shadow: 0 0 0 2px rgba(143,209,90,0.35), inset 0 1px 0 rgba(255,255,255,0.25);
 }
 
+.cc-time-btn.disabled,
+.cc-mode-btn.disabled,
+.cc-difficulty-btn.disabled,
+.cc-side-btn.disabled{
+  opacity: 0.6;
+  filter: grayscale(1);
+  pointer-events: none;
+
+  background: linear-gradient(180deg, #3a3a3a, #2e2e2e) !important;
+
+  color: #b5b5b5 !important;
+  border-color: rgba(255,255,255,0.12) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.05) !important;
+}
+
+
+
 .cc-primary{
   width: 100%;
   background: linear-gradient(180deg, #8fd15a, #6aa93d);
@@ -386,11 +403,6 @@ body{
   box-shadow: 0 0 0 2px rgba(143,209,90,0.35), inset 0 1px 0 rgba(255,255,255,0.25);
 }
 
-.cc-mode-btn.disabled{
-  opacity: 0.4;
-  pointer-events: none;
-  filter: grayscale(1);
-}
 
 
 .cc-side-select{

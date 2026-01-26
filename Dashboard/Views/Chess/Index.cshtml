@@ -111,17 +111,6 @@
 
 <script>
     let selectedTime = 10;
-
-    $('.cc-time-btn').click(function () {
-        $('.cc-time-btn').removeClass('active');
-        $(this).addClass('active');
-
-        selectedTime = $(this).data('time');
-        console.log("Selected time:", selectedTime);
-    });
-</script>
-
-<script>
     let selectedMode = "player";
     let selectedDifficulty = "beginner";
     let selectedSide = "white";
@@ -142,71 +131,17 @@
         }
     }
 
-    $('.cc-mode-btn').click(function () {
-        $('.cc-mode-btn').removeClass('active');
-        $(this).addClass('active');
+    $('.cc-time-btn').on('click', function () {
+        if ($(this).hasClass('disabled')) return;
 
-        selectedMode = $(this).data('mode');
-        updateDifficultyVisibility();
-        updateSideVisibility();
-
-        console.log("Selected mode:", selectedMode);
-    });
-
-    $('.cc-difficulty-btn').click(function () {
-        $('.cc-difficulty-btn').removeClass('active');
-        $(this).addClass('active');
-
-        selectedDifficulty = $(this).data('level');
-        console.log("Selected difficulty:", selectedDifficulty);
-    });
-
-    $('.cc-side-btn').click(function () {
-        $('.cc-side-btn').removeClass('active');
-        $(this).addClass('active');
-
-        selectedSide = $(this).data('side');
-        console.log("Selected side:", selectedSide);
-    });
-
-    updateDifficultyVisibility();
-    updateSideVisibility();
-</script>
-
-<script>
-    let selectedTime = 10;
-
-    $('.cc-time-btn').click(function () {
         $('.cc-time-btn').removeClass('active');
         $(this).addClass('active');
 
         selectedTime = $(this).data('time');
         console.log("Selected time:", selectedTime);
     });
-</script>
 
-<script>
-    let selectedMode = "player";
-    let selectedDifficulty = "beginner";
-    let selectedSide = "white";
-
-    function updateDifficultyVisibility() {
-        if (selectedMode === "cpu") {
-            $('.cc-difficulty-select').fadeIn(120);
-        } else {
-            $('.cc-difficulty-select').fadeOut(120);
-        }
-    }
-
-    function updateSideVisibility() {
-        if (selectedMode === "cpu") {
-            $('.cc-side-select').fadeIn(120);
-        } else {
-            $('.cc-side-select').fadeOut(120);
-        }
-    }
-
-    $('.cc-mode-btn').click(function () {
+    $('.cc-mode-btn').on('click', function () {
         if ($(this).hasClass('disabled')) return;
 
         $('.cc-mode-btn').removeClass('active');
@@ -219,7 +154,9 @@
         console.log("Selected mode:", selectedMode);
     });
 
-    $('.cc-difficulty-btn').click(function () {
+    $('.cc-difficulty-btn').on('click', function () {
+        if ($(this).hasClass('disabled')) return;
+
         $('.cc-difficulty-btn').removeClass('active');
         $(this).addClass('active');
 
@@ -227,7 +164,9 @@
         console.log("Selected difficulty:", selectedDifficulty);
     });
 
-    $('.cc-side-btn').click(function () {
+    $('.cc-side-btn').on('click', function () {
+        if ($(this).hasClass('disabled')) return;
+
         $('.cc-side-btn').removeClass('active');
         $(this).addClass('active');
 
@@ -239,10 +178,19 @@
     updateSideVisibility();
 </script>
 
+
 <script>
     var board = null;
     var lastFen = null;
     var pendingPromotion = null;
+
+    function lockGameSettings() {
+        $('.cc-mode-btn, .cc-difficulty-btn, .cc-side-btn, .cc-time-btn').addClass('disabled');
+    }
+
+    function unlockGameSettings() {
+        $('.cc-mode-btn, .cc-difficulty-btn, .cc-side-btn, .cc-time-btn').removeClass('disabled');
+    }
 
     function clearCheckHighlight() {
         $('#board .cc-check').removeClass('cc-check');
@@ -280,7 +228,6 @@
         setTimeout(() => board.resize(), 250);
     }
 
-    // UPDATED: now supports side-specific styling (white / black)
     function showGameOver(message, type, side) {
         $("#promotionPicker").hide();
 
@@ -291,12 +238,13 @@
             .addClass(type);
 
         if (side) {
-            msg.addClass(side); // "white" or "black"
+            msg.addClass(side);
         }
 
         msg.text(message).fadeIn();
 
-        $('.cc-mode-btn').removeClass('disabled');
+        // ✅ unlock everything when the game ends
+        unlockGameSettings();
 
         var fen = (board && typeof board.fen === "function") ? board.fen() : lastFen;
         var ori = (board && typeof board.orientation === "function") ? board.orientation() : "white";
@@ -396,8 +344,7 @@
             if (response.winner === "Draw") {
                 showGameOver("Draw", "draw");
             } else {
-                // UPDATED: pass winning side for color ("white" or "black")
-                var winnerSide = ("" + response.winner).toLowerCase(); // expects "White"/"Black"
+                var winnerSide = ("" + response.winner).toLowerCase();
                 showGameOver("Checkmate! Winner: " + response.winner, "win", winnerSide);
             }
         }
@@ -462,7 +409,8 @@
             data: JSON.stringify({
                 mode: selectedMode,
                 side: selectedSide,
-                difficulty: selectedDifficulty
+                difficulty: selectedDifficulty,
+                time: selectedTime
             }),
             success: function (response) {
                 if (!response) return;
@@ -470,11 +418,11 @@
                 createBoard(true, response.fen, response.orientation);
                 lastFen = response.fen;
 
-                // UPDATED: also remove side classes
                 $("#gameOverMessage").hide().removeClass("win lose draw white black").text("");
                 clearCheckHighlight();
 
-                $('.cc-mode-btn').addClass('disabled');
+                // ✅ lock all game settings once started
+                lockGameSettings();
 
                 applyCheckHighlight(response.checkSquare, response.checkAttackers);
             }
@@ -490,6 +438,9 @@
             } else {
                 showGameOver("You resigned!", "lose");
             }
+
+            // ✅ just in case
+            unlockGameSettings();
         });
     });
 
@@ -509,5 +460,4 @@
 
     createBoard(false, '@ViewBag.FEN', 'white');
 </script>
-
 
