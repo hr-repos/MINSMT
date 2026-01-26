@@ -306,16 +306,24 @@ body{
   box-shadow: 0 0 0 2px rgba(143,209,90,0.35), inset 0 1px 0 rgba(255,255,255,0.25);
 }
 
+.cc-time-btn.disabled,
+.cc-mode-btn.disabled,
+.cc-difficulty-btn.disabled,
+.cc-side-btn.disabled{
+  pointer-events: none !important;
+}
+
 .cc-time-btn.active.disabled,
 .cc-mode-btn.active.disabled,
 .cc-difficulty-btn.active.disabled,
 .cc-side-btn.active.disabled{
-  pointer-events: none;
+  pointer-events: none !important;
   background: linear-gradient(180deg, #979494, #444343) !important;
   color: #b5b5b5 !important;
   border-color: rgba(255,255,255,0.12) !important;
   box-shadow: none !important;
 }
+
 
 
 

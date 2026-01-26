@@ -243,7 +243,6 @@
 
         msg.text(message).fadeIn();
 
-        // ✅ unlock everything when the game ends
         unlockGameSettings();
 
         var fen = (board && typeof board.fen === "function") ? board.fen() : lastFen;
@@ -407,27 +406,30 @@
             method: 'POST',
             contentType: 'application/json',
             data: JSON.stringify({
-                mode: selectedMode,
-                side: selectedSide,
-                difficulty: selectedDifficulty,
-                time: selectedTime
+            mode: selectedMode,
+            side: selectedSide,
+            difficulty: selectedDifficulty
             }),
             success: function (response) {
-                if (!response) return;
+            if (!response) return;
 
-                createBoard(true, response.fen, response.orientation);
-                lastFen = response.fen;
+            createBoard(true, response.fen, response.orientation);
+            lastFen = response.fen;
 
-                $("#gameOverMessage").hide().removeClass("win lose draw white black").text("");
-                clearCheckHighlight();
+            $("#gameOverMessage")
+                .hide()
+                .removeClass("win lose draw white black")
+                .text("");
 
-                // ✅ lock all game settings once started
-                lockGameSettings();
+            clearCheckHighlight();
 
-                applyCheckHighlight(response.checkSquare, response.checkAttackers);
+            lockGameSettings();
+
+            applyCheckHighlight(response.checkSquare, response.checkAttackers);
             }
         });
     });
+
 
     $('#resignBtn').click(function () {
         $("#promotionPicker").hide();
@@ -439,7 +441,6 @@
                 showGameOver("You resigned!", "lose");
             }
 
-            // ✅ just in case
             unlockGameSettings();
         });
     });
