@@ -81,7 +81,8 @@
                 <aside class="cc-sidebar">
 
                     <div class="cc-card">
-                        <button id="startBtn" class="cc-primary" type="button">Start Game</button>
+                        <button id="startBtn" class="cc-primary" type="button">New Game</button>
+                        <button id="rematchBtn" class="cc-secondary" type="button" style="display:none;">Rematch</button>
                         <button id="resignBtn" class="cc-danger" type="button" style="display:none;">Resign</button>
                     <div class="cc-mode-select">
                         <button class="cc-mode-btn active" data-mode="player" type="button">Player</button>
@@ -197,6 +198,8 @@
     var lastFen = null;
     var pendingPromotion = null;
 
+    var hasPlayedOnce = false;
+
     function openStartPopup() {
         $("#gameOverMessage").hide();
         $("#promotionPicker").hide();
@@ -237,7 +240,9 @@
 
                 lockGameSettings();
 
+
                 $("#startBtn").addClass("disabled");
+                $("#rematchBtn").hide();
 
                 applyCheckHighlight(response.checkSquare, response.checkAttackers);
 
@@ -249,7 +254,7 @@
     $(function () {
         $("#resignBtn").hide();
         $("#startInputPopup").hide();
-
+        $("#rematchBtn").hide();
         $("#startInputCancel").on("click", function () {
             closeStartPopup();
         });
@@ -268,6 +273,11 @@
                 e.preventDefault();
                 $("#startInputOk").click();
             }
+        });
+
+        $("#rematchBtn").on("click", function () {
+            if ($(this).hasClass("disabled")) return;
+            openStartPopup();
         });
     });
 
@@ -321,6 +331,11 @@
         $("#promotionPicker").hide();
 
         $("#startBtn").removeClass("disabled");
+
+        hasPlayedOnce = true;
+        if (hasPlayedOnce) {
+            $("#rematchBtn").fadeIn(120);
+        }
 
         var msg = $("#gameOverMessage");
 
@@ -510,6 +525,9 @@
             unlockGameSettings();
 
             $("#startBtn").removeClass("disabled");
+
+            hasPlayedOnce = true;
+            $("#rematchBtn").fadeIn(120);
         });
     });
 
@@ -529,4 +547,5 @@
 
     createBoard(false, '@ViewBag.FEN', 'white');
 </script>
+
 
