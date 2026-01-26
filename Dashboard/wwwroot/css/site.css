@@ -446,6 +446,15 @@ body{
   box-shadow: 0 2px 0 #4f7f2b, 0 4px 10px rgba(0,0,0,0.4);
 }
 
+
+.cc-primary.disabled {
+  pointer-events: none;
+  background: linear-gradient(180deg, #6f6f6f, #4a4a4a);
+  color: #cfcfcf;
+  box-shadow: none;
+  filter: grayscale(0.4);
+}
+
 .cc-danger{
   width: 100%;
   margin-top: 10px;

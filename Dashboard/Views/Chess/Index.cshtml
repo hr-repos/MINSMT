@@ -237,6 +237,8 @@
 
                 lockGameSettings();
 
+                $("#startBtn").addClass("disabled");
+
                 applyCheckHighlight(response.checkSquare, response.checkAttackers);
 
                 $("#resignBtn").fadeIn(120);
@@ -317,6 +319,8 @@
         $("#resignBtn").hide();
         $("#startInputPopup").hide();
         $("#promotionPicker").hide();
+
+        $("#startBtn").removeClass("disabled");
 
         var msg = $("#gameOverMessage");
 
@@ -486,6 +490,7 @@
     }
 
     $('#startBtn').click(function () {
+        if ($(this).hasClass('disabled')) return;
         openStartPopup();
     });
 
@@ -503,6 +508,8 @@
             }
 
             unlockGameSettings();
+
+            $("#startBtn").removeClass("disabled");
         });
     });
 
