@@ -173,7 +173,7 @@ body{
   position: absolute;
 
 
-  left: 50%;
+  left: 43%;
   top: 50%;
   transform: translate(calc(-50% + var(--start-popup-x)), -50%);
   width: min(380px, 90%);
