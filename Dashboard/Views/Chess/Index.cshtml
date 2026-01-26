@@ -61,6 +61,20 @@
                             <div id="promotionPicker" class="cc-promo" style="display:none;"></div>
                     </div>
 
+                    <div id="gameOverMessage" class="cc-gameover" style="display:none;"></div>
+
+                <div id="startInputPopup" class="cc-gameover cc-startpopup" style="display:none;">
+                    <div class="cc-popup-title">Enter Unique Code</div>
+                    <input id="startInputValue" class="cc-popup-input" type="text" placeholder="Type something..." />
+                    <div class="cc-popup-actions">
+                        <button id="startInputCancel" class="cc-secondary" type="button">Cancel</button>
+                        <button id="startInputOk" class="cc-primary" type="button">OK</button>
+                    </div>
+                </div>
+
+                <div id="promotionPicker" class="cc-promo" style="display:none;"></div>
+
+
                 </section>
 
                 <!-- RIGHT: sidebar -->
@@ -183,8 +197,75 @@
     var lastFen = null;
     var pendingPromotion = null;
 
+    function openStartPopup() {
+        $("#gameOverMessage").hide();
+        $("#promotionPicker").hide();
+
+        $("#startInputValue").val("");
+        $("#startInputPopup").fadeIn(120);
+
+        setTimeout(() => $("#startInputValue").trigger("focus"), 150);
+    }
+
+    function closeStartPopup() {
+        $("#startInputPopup").hide();
+    }
+
+    function runStartGameAjax() {
+        $.ajax({
+            url: '/Chess/StartGame',
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({
+                mode: selectedMode,
+                side: selectedSide,
+                difficulty: selectedDifficulty
+            }),
+            success: function (response) {
+                if (!response) return;
+
+                createBoard(true, response.fen, response.orientation);
+                lastFen = response.fen;
+
+                $("#gameOverMessage")
+                    .hide()
+                    .removeClass("win lose draw white black")
+                    .text("");
+
+                clearCheckHighlight();
+
+                lockGameSettings();
+
+                applyCheckHighlight(response.checkSquare, response.checkAttackers);
+
+                $("#resignBtn").fadeIn(120);
+            }
+        });
+    }
+
     $(function () {
         $("#resignBtn").hide();
+        $("#startInputPopup").hide();
+
+        $("#startInputCancel").on("click", function () {
+            closeStartPopup();
+        });
+
+        $("#startInputOk").on("click", function () {
+            var value = $("#startInputValue").val();
+            console.log("Popup input:", value);
+
+            closeStartPopup();
+
+            runStartGameAjax();
+        });
+
+        $("#startInputValue").on("keydown", function (e) {
+            if (e.key === "Enter") {
+                e.preventDefault();
+                $("#startInputOk").click();
+            }
+        });
     });
 
     function lockGameSettings() {
@@ -233,7 +314,7 @@
 
     function showGameOver(message, type, side) {
         $("#resignBtn").hide();
-
+        $("#startInputPopup").hide();
         $("#promotionPicker").hide();
 
         var msg = $("#gameOverMessage");
@@ -404,41 +485,12 @@
     }
 
     $('#startBtn').click(function () {
-        $("#promotionPicker").hide();
-
-        $.ajax({
-            url: '/Chess/StartGame',
-            method: 'POST',
-            contentType: 'application/json',
-            data: JSON.stringify({
-                mode: selectedMode,
-                side: selectedSide,
-                difficulty: selectedDifficulty
-            }),
-            success: function (response) {
-                if (!response) return;
-
-                createBoard(true, response.fen, response.orientation);
-                lastFen = response.fen;
-
-                $("#gameOverMessage")
-                    .hide()
-                    .removeClass("win lose draw white black")
-                    .text("");
-
-                clearCheckHighlight();
-
-                lockGameSettings();
-
-                applyCheckHighlight(response.checkSquare, response.checkAttackers);
-
-                $("#resignBtn").fadeIn(120);
-            }
-        });
+        openStartPopup();
     });
 
     $('#resignBtn').click(function () {
         $("#promotionPicker").hide();
+        $("#startInputPopup").hide();
 
         $("#resignBtn").hide();
 
@@ -469,5 +521,4 @@
 
     createBoard(false, '@ViewBag.FEN', 'white');
 </script>
-
 

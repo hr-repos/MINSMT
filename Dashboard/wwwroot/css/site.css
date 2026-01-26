@@ -20,7 +20,7 @@ html, body {
   --border: rgba(255,255,255,0.08);
   --shadow: 0 10px 30px rgba(0,0,0,0.35);
   --radius: 14px;
-
+  --start-popup-x: -7%;
   --sidebar-w: 320px;
   --gap: 18px;
   --pad: 18px;
@@ -167,6 +167,102 @@ body{
   border: 1px solid #b03030;
   color: #ffffff;
 }
+
+
+#startInputPopup.cc-gameover {
+  position: absolute;
+
+
+  left: 50%;
+  top: 50%;
+  transform: translate(calc(-50% + var(--start-popup-x)), -50%);
+  width: min(380px, 90%);
+  max-width: 92%;
+
+  padding: 18px;
+  border-radius: 16px;
+
+  background: linear-gradient(180deg, #1a1a1a, #0f0f0f);
+  border: 1px solid rgba(255,255,255,0.12);
+  box-shadow: 0 14px 40px rgba(0,0,0,0.75);
+
+  color: #ffffff;
+  text-align: center;
+
+  z-index: 60;
+}
+
+
+
+.cc-popup-title {
+  font-weight: 900;
+  font-size: 18px;
+  margin-bottom: 12px;
+  color: #ffffff;
+}
+
+
+.cc-popup-input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px 14px;
+  border-radius: 12px;
+
+  background: #111;
+  color: #ffffff;
+
+  border: 1px solid rgba(255,255,255,0.15);
+  outline: none;
+  font-size: 15px;
+}
+
+.cc-popup-input::placeholder {
+  color: rgba(255,255,255,0.45);
+}
+
+.cc-popup-input:focus {
+  border-color: #79b54a;
+  box-shadow: 0 0 0 2px rgba(121,181,74,0.35);
+}
+
+
+.cc-popup-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+
+#startInputCancel {
+  flex: 1;
+  background: linear-gradient(180deg, #d85a5a, #b63f3f);
+  color: #ffffff;
+  border: none;
+  border-radius: 14px;
+  padding: 12px 0;
+  font-size: 16px;
+  font-weight: 900;
+  cursor: pointer;
+
+  box-shadow: 0 5px 0 #7e2f2f, 0 8px 18px rgba(0,0,0,0.5);
+}
+
+#startInputCancel:hover {
+  filter: brightness(1.05);
+}
+
+#startInputCancel:active {
+  transform: translateY(3px);
+  box-shadow: 0 2px 0 #7e2f2f, 0 4px 10px rgba(0,0,0,0.4);
+}
+
+
+#startInputOk {
+  flex: 1;
+  padding: 12px 0;
+  font-size: 16px;
+}
+
 
 
 .cc-boardbar{
@@ -624,4 +720,33 @@ body{
   :root{ --frame-chrome: 96px; }
   .cc-moves{ max-height: 140px; }
   .cc-board-wrap{ padding: 10px; }
+}
+
+
+@media (min-width: 1100px) {
+  #startInputPopup.cc-gameover {
+    transform: translate(-55%, -50%);
+  }
+}
+
+@media (max-width: 480px) {
+  #startInputPopup.cc-gameover {
+    padding: 14px;
+    border-radius: 14px;
+  }
+
+  .cc-popup-title {
+    font-size: 16px;
+  }
+
+  .cc-popup-input {
+    font-size: 14px;
+    padding: 10px 12px;
+  }
+
+  #startInputCancel,
+  #startInputOk {
+    font-size: 15px;
+    padding: 11px 0;
+  }
 }
