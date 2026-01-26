@@ -68,7 +68,7 @@
 
                     <div class="cc-card">
                         <button id="startBtn" class="cc-primary" type="button">Start Game</button>
-                        <button id="resignBtn" class="cc-danger" type="button">Resign</button>
+                        <button id="resignBtn" class="cc-danger" type="button" style="display:none;">Resign</button>
                     <div class="cc-mode-select">
                         <button class="cc-mode-btn active" data-mode="player" type="button">Player</button>
                         <button class="cc-mode-btn" data-mode="cpu" type="button">CPU</button>
@@ -178,11 +178,14 @@
     updateSideVisibility();
 </script>
 
-
 <script>
     var board = null;
     var lastFen = null;
     var pendingPromotion = null;
+
+    $(function () {
+        $("#resignBtn").hide();
+    });
 
     function lockGameSettings() {
         $('.cc-mode-btn, .cc-difficulty-btn, .cc-side-btn, .cc-time-btn').addClass('disabled');
@@ -229,6 +232,8 @@
     }
 
     function showGameOver(message, type, side) {
+        $("#resignBtn").hide();
+
         $("#promotionPicker").hide();
 
         var msg = $("#gameOverMessage");
@@ -406,33 +411,36 @@
             method: 'POST',
             contentType: 'application/json',
             data: JSON.stringify({
-            mode: selectedMode,
-            side: selectedSide,
-            difficulty: selectedDifficulty
+                mode: selectedMode,
+                side: selectedSide,
+                difficulty: selectedDifficulty
             }),
             success: function (response) {
-            if (!response) return;
+                if (!response) return;
 
-            createBoard(true, response.fen, response.orientation);
-            lastFen = response.fen;
+                createBoard(true, response.fen, response.orientation);
+                lastFen = response.fen;
 
-            $("#gameOverMessage")
-                .hide()
-                .removeClass("win lose draw white black")
-                .text("");
+                $("#gameOverMessage")
+                    .hide()
+                    .removeClass("win lose draw white black")
+                    .text("");
 
-            clearCheckHighlight();
+                clearCheckHighlight();
 
-            lockGameSettings();
+                lockGameSettings();
 
-            applyCheckHighlight(response.checkSquare, response.checkAttackers);
+                applyCheckHighlight(response.checkSquare, response.checkAttackers);
+
+                $("#resignBtn").fadeIn(120);
             }
         });
     });
 
-
     $('#resignBtn').click(function () {
         $("#promotionPicker").hide();
+
+        $("#resignBtn").hide();
 
         $.post('/Chess/Resign', function (response) {
             if (response && response.winner) {
@@ -461,4 +469,5 @@
 
     createBoard(false, '@ViewBag.FEN', 'white');
 </script>
+
 
