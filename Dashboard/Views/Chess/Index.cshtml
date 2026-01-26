@@ -211,7 +211,7 @@
         $("#startInputPopup").hide();
     }
 
-    function runStartGameAjax() {
+    function runStartGameAjax(boardCode) {
         $.ajax({
             url: '/Chess/StartGame',
             method: 'POST',
@@ -219,7 +219,8 @@
             data: JSON.stringify({
                 mode: selectedMode,
                 side: selectedSide,
-                difficulty: selectedDifficulty
+                difficulty: selectedDifficulty,
+                boardCode: boardCode,
             }),
             success: function (response) {
                 if (!response) return;
@@ -257,7 +258,7 @@
 
             closeStartPopup();
 
-            runStartGameAjax();
+            runStartGameAjax(value);
         });
 
         $("#startInputValue").on("keydown", function (e) {

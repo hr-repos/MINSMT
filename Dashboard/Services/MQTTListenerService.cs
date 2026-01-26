@@ -5,6 +5,7 @@ using System.Text.Json;
 public class MqttListener
 {
     private static IMqttClient _client;
+    private static string _currentBoardCode = null;
 
     public static async Task Connect()
     {
@@ -26,8 +27,36 @@ public class MqttListener
         
         using var timeout = new CancellationTokenSource(5000);
         await _client.ConnectAsync(options, timeout.Token);
-        await _client.SubscribeAsync("move");
-        Console.WriteLine("MQTT CONNECTED & SUBSCRIBED");
+        Console.WriteLine("MQTT CONNECTED");
+    }
+
+    public static async Task ConnectToBoard(string boardCode)
+    {
+        await Connect();
+
+        if (_currentBoardCode != null)
+        {
+            await _client.UnsubscribeAsync($"{_currentBoardCode}/move");
+        }
+
+        _currentBoardCode = boardCode;
+
+        await _client.SubscribeAsync($"{boardCode}/move");
+
+        Console.WriteLine($"SUBSCRIBED TO BOARD {boardCode}");
+    }
+
+    public static async Task SendMoveToBoard(string move)
+    {
+        if (_client == null || !_client.IsConnected || _currentBoardCode == null)
+            return;
+
+        var message = new MqttApplicationMessageBuilder()
+            .WithTopic($"{_currentBoardCode}/move")
+            .WithPayload(move)
+            .Build();
+
+        await _client.PublishAsync(message);
     }
 
     private static void HandleBoardMessage(string payload)

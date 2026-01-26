@@ -28,6 +28,8 @@ public class ChessController : Controller
     {
         ChessboardService.Reset();
 
+        await MqttListener.ConnectToBoard(settings.BoardCode);
+
         ChessboardService.Mode =
             settings.Mode == "cpu" ? GameMode.HumanVsAI : GameMode.HumanVsHuman;
 
@@ -45,10 +47,11 @@ public class ChessController : Controller
 
         ChessboardService.GameStarted = true;
 
-        if (ChessboardService.Mode == GameMode.HumanVsAI &&
-            ChessboardService.HumanSide == PlayerSide.Black)
+        if (ChessboardService.Mode == GameMode.HumanVsAI && ChessboardService.HumanSide == PlayerSide.Black)
         {
-            await ChessboardService.MakeAIMoveAsync();
+            string aiMove = await ChessboardService.MakeAIMoveAsync();
+            if (aiMove != null)
+                await MqttListener.SendMoveToBoard(aiMove);
         }
 
         return Json(new
@@ -128,6 +131,7 @@ public class StartGameRequest
     public string Mode { get; set; }
     public string Side { get; set; }
     public string Difficulty { get; set; }
+    public string BoardCode { get; set; }
 }
 
 public class MoveRequest
