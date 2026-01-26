@@ -7,6 +7,7 @@ public static class ChessboardService
     public static bool GameStarted { get; set; } = false;
     public static GameMode Mode { get; set; } = GameMode.HumanVsHuman;
     public static PlayerSide HumanSide { get; set; } = PlayerSide.White;
+    public static AIDifficulty Difficulty { get; set; } = AIDifficulty.Beginner;
 
     private static StockfishEngineService engine =
         new StockfishEngineService("StockfishEngine/stockfish-windows-x86-64-avx2.exe");
@@ -52,8 +53,12 @@ public static class ChessboardService
         if (Game.WhoseTurn != aiPlayer)
             return null;
 
+        var (skill, depth) = GetDifficultySettings();
+
+        engine.SetSkillLevel(skill);
+
         string fen = Game.GetFen();
-        string best = await engine.GetMove(fen);
+        string best = await engine.GetMove(fen, depth);
 
         if (string.IsNullOrWhiteSpace(best) || best.Length < 4)
             return null;
@@ -109,6 +114,18 @@ public static class ChessboardService
         if (Game.IsStalemated(Player.Black)) return "Draw";
 
         return null;
+    }
+
+    private static (int skill, int depth) GetDifficultySettings()
+    {
+        return Difficulty switch
+        {
+            AIDifficulty.Beginner      => (0, 6),
+            AIDifficulty.Intermediate  => (3, 10),
+            AIDifficulty.Expert        => (5, 14),
+            AIDifficulty.Master        => (20, 18),
+            _                          => (0, 6)
+        };
     }
 
     public static string GetCheckSquare()

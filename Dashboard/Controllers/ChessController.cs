@@ -34,6 +34,15 @@ public class ChessController : Controller
         ChessboardService.HumanSide =
             settings.Side == "black" ? PlayerSide.Black : PlayerSide.White;
 
+        ChessboardService.Difficulty = settings.Difficulty switch
+        {
+            "beginner" => AIDifficulty.Beginner,
+            "intermediate" => AIDifficulty.Intermediate,
+            "expert" => AIDifficulty.Expert,
+            "master" => AIDifficulty.Master,
+            _ => AIDifficulty.Beginner
+        };
+
         ChessboardService.GameStarted = true;
 
         if (ChessboardService.Mode == GameMode.HumanVsAI &&
@@ -118,6 +127,7 @@ public class StartGameRequest
 {
     public string Mode { get; set; }
     public string Side { get; set; }
+    public string Difficulty { get; set; }
 }
 
 public class MoveRequest
@@ -126,3 +136,4 @@ public class MoveRequest
     public string To { get; set; }
     public char? Promotion { get; set; }
 }
+

@@ -18,12 +18,9 @@ public class StockfishEngineService
 
         // Welcome Read
         engineProcess.StandardOutput.ReadLine();
-
-        engineProcess.StandardInput.WriteLine("uci");
-        engineProcess.StandardInput.WriteLine("setoption name Skill Level value 0");
     }
 
-    public async Task<string> GetMove(string fen, int depth = 15)
+    public async Task<string> GetMove(string fen, int depth)
     {
         engineProcess.StandardInput.WriteLine($"position fen {fen}");
         engineProcess.StandardInput.WriteLine($"go depth {depth}");
@@ -40,9 +37,22 @@ public class StockfishEngineService
         }
     }
 
+    public void SetSkillLevel(int level)
+    {
+        engineProcess.StandardInput.WriteLine($"setoption name Skill Level value {level}");
+    }
+
     public void Quit()
     {
         engineProcess.StandardInput.WriteLine("quit");
         engineProcess.Close();
     }
+}
+
+public enum AIDifficulty
+{
+    Beginner,
+    Intermediate,
+    Expert,
+    Master
 }
