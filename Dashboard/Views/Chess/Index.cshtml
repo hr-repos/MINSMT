@@ -80,14 +80,17 @@
                 <!-- RIGHT: sidebar -->
                 <aside class="cc-sidebar">
 
-                    <div class="cc-card">
-                        <button id="startBtn" class="cc-primary" type="button">New Game</button>
-                        <button id="rematchBtn" class="cc-secondary" type="button" style="display:none;">Rematch</button>
-                        <button id="resignBtn" class="cc-danger" type="button" style="display:none;">Resign</button>
-                    <div class="cc-mode-select">
-                        <button class="cc-mode-btn active" data-mode="player" type="button">Player</button>
-                        <button class="cc-mode-btn" data-mode="cpu" type="button">CPU</button>
-                    </div>
+            <div class="cc-card">
+                <button id="startGameBtn" class="cc-primary" type="button">Start Game</button>
+                <button id="startBtn" class="cc-primary" type="button" style="display:none;">New Game</button>
+                <button id="rematchBtn" class="cc-secondary" type="button" style="display:none;">Rematch</button>
+                <button id="resignBtn" class="cc-danger" type="button" style="display:none;">Resign</button>
+
+                <div class="cc-mode-select">
+                    <button class="cc-mode-btn active" data-mode="player" type="button">Player</button>
+                    <button class="cc-mode-btn" data-mode="cpu" type="button">CPU</button>
+                </div>
+
 
                 <div class="cc-difficulty-select" style="display:none;">
                     <button class="cc-difficulty-btn active" data-level="beginner" type="button">Beginner</button>
@@ -205,6 +208,8 @@
 
     var hasPlayedOnce = false;
 
+
+
     function setDisconnected() {
         $("#connectionStatus")
             .removeClass("connected")
@@ -233,6 +238,23 @@
         $("#startInputPopup").hide();
     }
 
+    function prepareForNewGame() {
+        $("#gameOverMessage").hide();
+        $("#promotionPicker").hide();
+        $("#startInputPopup").hide();
+
+        unlockGameSettings();
+
+        $("#startGameBtn").removeClass("disabled").fadeIn(120);
+        $("#rematchBtn").hide();
+
+        $("#startBtn").hide();
+
+        $("#resignBtn").hide();
+
+        if ($("#connectionStatus").length) setDisconnected();
+    }
+
     function runStartGameAjax(boardCode) {
         $.ajax({
             url: '/Chess/StartGame',
@@ -242,7 +264,7 @@
                 mode: selectedMode,
                 side: selectedSide,
                 difficulty: selectedDifficulty,
-                boardCode: boardCode,
+                boardCode: boardCode
             }),
             success: function (response) {
                 if (!response) return;
@@ -259,12 +281,12 @@
 
                 lockGameSettings();
 
-                $("#startBtn").addClass("disabled");
+                $("#startGameBtn").hide();
+                $("#startBtn").hide();
                 $("#rematchBtn").hide();
+                $("#resignBtn").fadeIn(120);
 
                 applyCheckHighlight(response.checkSquare, response.checkAttackers);
-
-                $("#resignBtn").fadeIn(120);
             }
         });
     }
@@ -272,12 +294,11 @@
     $(function () {
         $("#resignBtn").hide();
         $("#startInputPopup").hide();
+        $("#startGameBtn").show();
+        $("#startBtn").hide();
         $("#rematchBtn").hide();
 
-
-        if ($("#connectionStatus").length) {
-            setDisconnected();
-        }
+        if ($("#connectionStatus").length) setDisconnected();
 
         $("#startInputCancel").on("click", function () {
             closeStartPopup();
@@ -289,12 +310,9 @@
 
             console.log("Popup input:", value);
 
-            if ($("#connectionStatus").length) {
-                setConnected(value);
-            }
+            if ($("#connectionStatus").length) setConnected(value);
 
             closeStartPopup();
-
             runStartGameAjax(value);
         });
 
@@ -360,19 +378,19 @@
         $("#startInputPopup").hide();
         $("#promotionPicker").hide();
 
-        if ($("#connectionStatus").length) {
-            setDisconnected();
-        }
-
-        $("#startBtn").removeClass("disabled");
-
         hasPlayedOnce = true;
+
+        if ($("#connectionStatus").length) setDisconnected();
+
+        $("#startBtn").removeClass("disabled").fadeIn(120);
+
+        $("#startGameBtn").hide();
+
         if (hasPlayedOnce) {
             $("#rematchBtn").fadeIn(120);
         }
 
         var msg = $("#gameOverMessage");
-
         msg
             .removeClass("win lose draw white black")
             .addClass(type);
@@ -382,8 +400,6 @@
         }
 
         msg.text(message).fadeIn();
-
-        unlockGameSettings();
 
         var fen = (board && typeof board.fen === "function") ? board.fen() : lastFen;
         var ori = (board && typeof board.orientation === "function") ? board.orientation() : "white";
@@ -538,9 +554,14 @@
         });
     }
 
-    $('#startBtn').click(function () {
+    $('#startGameBtn').click(function () {
         if ($(this).hasClass('disabled')) return;
         openStartPopup();
+    });
+
+    $('#startBtn').click(function () {
+        if ($(this).hasClass('disabled')) return;
+        prepareForNewGame();
     });
 
     $('#resignBtn').click(function () {
@@ -554,17 +575,6 @@
                 showGameOver("You resigned! Winner: " + response.winner, "lose");
             } else {
                 showGameOver("You resigned!", "lose");
-            }
-
-            unlockGameSettings();
-
-            $("#startBtn").removeClass("disabled");
-
-            hasPlayedOnce = true;
-            $("#rematchBtn").fadeIn(120);
-
-            if ($("#connectionStatus").length) {
-                setDisconnected();
             }
         });
     });
@@ -585,6 +595,5 @@
 
     createBoard(false, '@ViewBag.FEN', 'white');
 </script>
-
 
 
