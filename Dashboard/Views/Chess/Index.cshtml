@@ -108,6 +108,11 @@
                             <button class="cc-time-btn" data-time="30">30 min</button>
                         </div>
                     </div>
+                <div class="cc-card cc-connection-card">
+                    <div id="connectionStatus" class="cc-connection disconnected">
+                        Disconnected
+                    </div>
+                </div>
 
                     <div class="cc-card">
                         <div class="cc-section-title">Moves</div>
@@ -200,6 +205,20 @@
 
     var hasPlayedOnce = false;
 
+    function setDisconnected() {
+        $("#connectionStatus")
+            .removeClass("connected")
+            .addClass("disconnected")
+            .text("Disconnected");
+    }
+
+    function setConnected(code) {
+        $("#connectionStatus")
+            .removeClass("disconnected")
+            .addClass("connected")
+            .text("Connected to " + code);
+    }
+
     function openStartPopup() {
         $("#gameOverMessage").hide();
         $("#promotionPicker").hide();
@@ -240,7 +259,6 @@
 
                 lockGameSettings();
 
-
                 $("#startBtn").addClass("disabled");
                 $("#rematchBtn").hide();
 
@@ -255,13 +273,25 @@
         $("#resignBtn").hide();
         $("#startInputPopup").hide();
         $("#rematchBtn").hide();
+
+
+        if ($("#connectionStatus").length) {
+            setDisconnected();
+        }
+
         $("#startInputCancel").on("click", function () {
             closeStartPopup();
         });
 
         $("#startInputOk").on("click", function () {
-            var value = $("#startInputValue").val();
+            var value = ($("#startInputValue").val() || "").trim();
+            if (!value) return;
+
             console.log("Popup input:", value);
+
+            if ($("#connectionStatus").length) {
+                setConnected(value);
+            }
 
             closeStartPopup();
 
@@ -329,6 +359,10 @@
         $("#resignBtn").hide();
         $("#startInputPopup").hide();
         $("#promotionPicker").hide();
+
+        if ($("#connectionStatus").length) {
+            setDisconnected();
+        }
 
         $("#startBtn").removeClass("disabled");
 
@@ -528,6 +562,10 @@
 
             hasPlayedOnce = true;
             $("#rematchBtn").fadeIn(120);
+
+            if ($("#connectionStatus").length) {
+                setDisconnected();
+            }
         });
     });
 
@@ -547,5 +585,6 @@
 
     createBoard(false, '@ViewBag.FEN', 'white');
 </script>
+
 
 
