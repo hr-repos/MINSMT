@@ -673,7 +673,8 @@ body{
 
 .cc-section-title{
   font-weight: 900;
-  margin-bottom: 10px;
+  text-align: center;
+  width: 100%;
 }
 
 .cc-muted{
