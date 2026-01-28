@@ -59,7 +59,7 @@ public class MqttListener
         await _client.PublishAsync(message);
     }
 
-    private static void HandleBoardMessage(string payload)
+    private static async void HandleBoardMessage(string payload)
     {
         var from = payload.Substring(0,2);
         var to = payload.Substring(2,2);
@@ -71,10 +71,10 @@ public class MqttListener
             promotion = payload[4]; // 'q', 'r', 'b', 'n'
         }
 
-        var success = ChessboardService.ApplyPhysicalMove(from, to, promotion);
+        ChessboardService.ApplyPhysicalMove(from, to, promotion);
+        Console.WriteLine($"PLAYER MOVE: {from} to {to}");
 
-        Console.WriteLine(success
-            ? $"MOVE APPLIED: {from} -> {to}"
-            : $"ILLEGAL MOVE: {from} -> {to}");
+        var aiMove = await ChessboardService.MakeAIMoveAsync();
+        Console.WriteLine($"AI MOVE: {aiMove}");
     }
 }
