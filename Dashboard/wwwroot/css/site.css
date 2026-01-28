@@ -220,6 +220,13 @@ body{
   color: #ffffff;
 }
 
+#gameOverMessage.cc-gameover.timeout {
+  background: linear-gradient(180deg, #3a3a3a, #2a2a2a);
+  border: 1px solid #6a6a6a;
+  color: #f0f0f0;
+}
+
+
 
 #startInputPopup.cc-gameover {
   position: absolute;

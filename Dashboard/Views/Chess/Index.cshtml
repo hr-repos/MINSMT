@@ -307,7 +307,10 @@
         var elapsed = (now - lastTickMs) / 1000.0;
         lastTickMs = now;
 
+        var winnerColor = (activeColor === "w") ? "Black" : "White";
+
         var playerColor = getPlayerColor();
+        var playerColorName = (playerColor === "w") ? "White" : "Black";
 
         if (activeColor === playerColor) {
             clockPlayerSec -= elapsed;
@@ -316,7 +319,12 @@
                 renderClocks();
                 matchActive = false;
                 stopClock();
-                showGameOver("Time out! Winner: Opponent", "lose");
+
+                showGameOver(
+                    "Time out! Winner: " + winnerColor,
+                    "timeout",
+                    winnerColor.toLowerCase()
+                );
                 return;
             }
         } else {
@@ -326,13 +334,20 @@
                 renderClocks();
                 matchActive = false;
                 stopClock();
-                showGameOver("Time out! Winner: Player", "win", selectedSide);
+
+                showGameOver(
+                    "Time out! Winner: " + winnerColor,
+                    "timeout",
+                    winnerColor.toLowerCase()
+                );
                 return;
             }
         }
 
         renderClocks();
     }
+
+
 
     function applySideThemes() {
         var playerIsWhite = (selectedSide === "white");
