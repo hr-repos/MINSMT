@@ -114,6 +114,8 @@ public static class ChessboardService
         if (Game.IsStalemated(Player.White)) return "Draw";
         if (Game.IsStalemated(Player.Black)) return "Draw";
 
+        if (Game.IsInsufficientMaterial()) return "Draw";
+
         return null;
     }
 
