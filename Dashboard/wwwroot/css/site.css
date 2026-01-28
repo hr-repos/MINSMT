@@ -441,6 +441,7 @@ body{
   border-radius: 10px;
   padding: 5px 9px;
   box-shadow: var(--shadow);
+  transition: opacity 0.12s ease;
 }
 
 .cc-time-select{
@@ -495,6 +496,16 @@ body{
 
 
 
+.cc-timer.is-hidden {
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+
+
+
+.cc-mode-cpu .cc-time-select { display: none !important; }
+.cc-mode-cpu .cc-timer { visibility: hidden; opacity: 0; pointer-events: none; }
 
 
 .cc-primary{

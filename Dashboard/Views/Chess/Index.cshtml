@@ -139,19 +139,29 @@
     let selectedSide = "white";
 
     function updateDifficultyVisibility() {
+        const $el = $('.cc-difficulty-select').stop(true, true);
+
         if (selectedMode === "cpu") {
-            $('.cc-difficulty-select').fadeIn(120);
+            $el.fadeIn(120);
         } else {
-            $('.cc-difficulty-select').fadeOut(120);
+            $el.fadeOut(120);
         }
     }
 
     function updateSideVisibility() {
+        const $el = $('.cc-side-select').stop(true, true);
+
         if (selectedMode === "cpu") {
-            $('.cc-side-select').fadeIn(120);
+            $el.fadeIn(120);
         } else {
-            $('.cc-side-select').fadeOut(120);
+            $el.fadeOut(120);
         }
+    }
+
+    function updateTimerVisibility() {
+        const cpu = (selectedMode === "cpu");
+
+        $('.cc-shell').toggleClass('cc-mode-cpu', cpu);
     }
 
     $('.cc-time-btn').on('click', function () {
@@ -171,8 +181,10 @@
         $(this).addClass('active');
 
         selectedMode = $(this).data('mode');
+
         updateDifficultyVisibility();
         updateSideVisibility();
+        updateTimerVisibility();
 
         console.log("Selected mode:", selectedMode);
     });
@@ -199,7 +211,11 @@
 
     updateDifficultyVisibility();
     updateSideVisibility();
+    updateTimerVisibility();
 </script>
+
+
+
 
 <script>
     var board = null;
