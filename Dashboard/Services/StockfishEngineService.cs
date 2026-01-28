@@ -20,8 +20,15 @@ public class StockfishEngineService
         engineProcess.StandardOutput.ReadLine();
     }
 
-    public async Task<string> GetMove(string fen, int depth)
+    public async Task<string> GetMove(string fen)
     {
+        var (elo, depth) = ChessboardService.GetDifficultySettings();
+
+        engineProcess.StandardInput.WriteLine("setoption name UCI_LimitStrength value true");
+        engineProcess.StandardInput.WriteLine($"setoption name UCI_Elo value {elo}");
+
+        engineProcess.StandardInput.WriteLine("setoption name Skill Level value 0");
+
         engineProcess.StandardInput.WriteLine($"position fen {fen}");
         engineProcess.StandardInput.WriteLine($"go depth {depth}");
 
@@ -35,11 +42,6 @@ public class StockfishEngineService
                 return parts[1];   // Example: "e2e4" or "g1f3"
             }
         }
-    }
-
-    public void SetSkillLevel(int level)
-    {
-        engineProcess.StandardInput.WriteLine($"setoption name Skill Level value {level}");
     }
 
     public void Quit()

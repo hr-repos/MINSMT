@@ -53,12 +53,8 @@ public static class ChessboardService
         if (Game.WhoseTurn != aiPlayer)
             return null;
 
-        var (skill, depth) = GetDifficultySettings();
-
-        engine.SetSkillLevel(skill);
-
         string fen = Game.GetFen();
-        string best = await engine.GetMove(fen, depth);
+        string best = await engine.GetMove(fen);
 
         if (string.IsNullOrWhiteSpace(best) || best.Length < 4)
             return null;
@@ -119,15 +115,15 @@ public static class ChessboardService
         return null;
     }
 
-    private static (int skill, int depth) GetDifficultySettings()
+    public static (int elo, int depth) GetDifficultySettings()
     {
         return Difficulty switch
         {
-            AIDifficulty.Beginner      => (0, 1),
-            AIDifficulty.Intermediate  => (3, 5),
-            AIDifficulty.Expert        => (5, 7),
-            AIDifficulty.Master        => (20, 18),
-            _                          => (0, 1)
+            AIDifficulty.Beginner      => (300, 1),
+            AIDifficulty.Intermediate  => (1000, 5),
+            AIDifficulty.Expert        => (1600, 7),
+            AIDifficulty.Master        => (2300, 18),
+            _                          => (300, 1)
         };
     }
 
