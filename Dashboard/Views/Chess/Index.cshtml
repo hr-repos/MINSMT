@@ -212,7 +212,17 @@
 
         selectedSide = $(this).data('side');
         console.log("Selected side:", selectedSide);
+
+        if (typeof applySideThemes === "function") {
+            applySideThemes();
+        }
+
+        if (typeof createBoard === "function") {
+            var fen = (typeof lastFen !== "undefined" && lastFen) ? lastFen : '@ViewBag.FEN';
+            createBoard(false, fen, selectedSide);
+        }
     });
+
 
     updateDifficultyVisibility();
     updateSideVisibility();
@@ -324,6 +334,19 @@
         renderClocks();
     }
 
+    function applySideThemes() {
+        var playerIsWhite = (selectedSide === "white");
+
+        var bottomTheme = playerIsWhite ? "cc-white" : "cc-black";
+        var topTheme = playerIsWhite ? "cc-black" : "cc-white";
+
+        $("#timerBottom").removeClass("cc-white cc-black").addClass(bottomTheme);
+        $("#timerTop").removeClass("cc-white cc-black").addClass(topTheme);
+
+        $(".cc-boardbar-bottom .cc-avatar").removeClass("cc-white cc-black").addClass(bottomTheme);
+        $(".cc-boardbar-top .cc-avatar").removeClass("cc-white cc-black").addClass(topTheme);
+    }
+
     function setDisconnected() {
         $("#connectionStatus")
             .removeClass("connected")
@@ -355,6 +378,8 @@
     function prepareForNewGame() {
         matchActive = false;
         stopClock();
+
+        applySideThemes();
 
         $("#gameOverMessage").hide();
         $("#promotionPicker").hide();
@@ -407,6 +432,8 @@
 
                 matchActive = true;
 
+                applySideThemes();
+
                 if (selectedMode === "player") {
                     initClocks(selectedTime);
                     startClockFromFen(response.fen);
@@ -425,6 +452,8 @@
         $("#rematchBtn").hide();
 
         if ($("#connectionStatus").length) setDisconnected();
+
+        applySideThemes();
 
         $("#startInputCancel").on("click", function () {
             closeStartPopup();
@@ -733,7 +762,6 @@
         });
     }, 1000);
 
-    createBoard(false, '@ViewBag.FEN', 'white');
+    createBoard(false, '@ViewBag.FEN', selectedSide);
 </script>
-
 

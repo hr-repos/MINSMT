@@ -107,6 +107,58 @@ body{
   stroke-linecap: round;
 }
 
+
+
+.cc-boardbar.cc-white .cc-timer,
+.cc-boardbar.cc-white .cc-avatar{
+  background: #ffffff !important;
+  border: 1px solid rgba(0,0,0,0.18) !important;
+  color: #000000 !important;
+  box-shadow: 0 8px 22px rgba(0,0,0,0.18) !important;
+}
+
+.cc-boardbar.cc-white .cc-avatar svg circle{
+  fill: rgba(0,0,0,0.10) !important;
+}
+.cc-boardbar.cc-white .cc-avatar svg path{
+  stroke: rgba(0,0,0,0.35) !important;
+}
+
+.cc-boardbar.cc-white .cc-player-left span{
+  color: rgba(0,0,0,0.85) !important;
+}
+
+.cc-boardbar.cc-black .cc-timer,
+.cc-boardbar.cc-black .cc-avatar{
+  background: rgba(255,255,255,0.06) !important;
+  border: 1px solid var(--border) !important;
+  color: var(--text) !important;
+}
+
+
+.cc-timer.cc-white,
+.cc-avatar.cc-white{
+  background: #d6d6d6  !important;
+  border: 1px solid rgba(0,0,0,0.18) !important;
+  color: #000000 !important;
+  box-shadow: 0 8px 22px rgba(0,0,0,0.18) !important;
+}
+
+.cc-avatar.cc-white svg circle{
+  fill: rgba(0,0,0,0.10) !important;
+}
+.cc-avatar.cc-white svg path{
+  stroke: rgba(0,0,0,0.35) !important;
+}
+
+.cc-timer.cc-black,
+.cc-avatar.cc-black{
+  background: rgba(255,255,255,0.06) !important;
+  border: 1px solid var(--border) !important;
+  color: var(--text) !important;
+}
+
+
 .cc-board-wrap{
   position: relative;
   flex: 1;
