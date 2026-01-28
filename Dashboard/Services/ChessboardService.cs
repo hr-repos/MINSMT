@@ -121,11 +121,11 @@ public static class ChessboardService
     {
         return Difficulty switch
         {
-            AIDifficulty.Beginner      => (0, 6),
-            AIDifficulty.Intermediate  => (3, 10),
-            AIDifficulty.Expert        => (5, 14),
+            AIDifficulty.Beginner      => (0, 1),
+            AIDifficulty.Intermediate  => (3, 5),
+            AIDifficulty.Expert        => (5, 7),
             AIDifficulty.Master        => (20, 18),
-            _                          => (0, 6)
+            _                          => (0, 1)
         };
     }
 

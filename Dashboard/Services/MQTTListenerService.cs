@@ -32,12 +32,12 @@ public class MqttListener
 
     public static async Task ConnectToBoard(string boardCode)
     {
-        await Connect();
-
         if (_currentBoardCode != null)
         {
             await _client.UnsubscribeAsync($"{_currentBoardCode}/move");
         }
+
+        await Connect();
 
         _currentBoardCode = boardCode;
 
