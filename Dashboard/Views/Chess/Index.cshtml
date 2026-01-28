@@ -172,7 +172,12 @@
 
         selectedTime = $(this).data('time');
         console.log("Selected time:", selectedTime);
+
+        if (typeof matchActive !== "undefined" && !matchActive) {
+            initClocks(selectedTime);
+        }
     });
+
 
     $('.cc-mode-btn').on('click', function () {
         if ($(this).hasClass('disabled')) return;
@@ -216,15 +221,108 @@
 
 
 
-
 <script>
     var board = null;
     var lastFen = null;
     var pendingPromotion = null;
 
     var hasPlayedOnce = false;
+    var matchActive = false;
 
+    var clockPlayerSec = 0;
+    var clockOpponentSec = 0;
+    var clockRunning = false;
+    var activeColor = null;
+    var lastTickMs = 0;
+    var clockIntervalId = null;
 
+    function getPlayerColor() {
+        return (selectedSide === "black") ? "b" : "w";
+    }
+
+    function formatClock(sec) {
+        sec = Math.max(0, Math.floor(sec));
+        var m = Math.floor(sec / 60);
+        var s = sec % 60;
+        return String(m).padStart(2, "0") + ":" + String(s).padStart(2, "0");
+    }
+
+    function renderClocks() {
+        $("#timerBottom").text(formatClock(clockPlayerSec));
+        $("#timerTop").text(formatClock(clockOpponentSec));
+    }
+
+    function getFenActiveColor(fen) {
+        if (!fen) return null;
+        var parts = fen.split(" ");
+        if (parts.length < 2) return null;
+        return parts[1] === "b" ? "b" : "w";
+    }
+
+    function stopClock() {
+        clockRunning = false;
+        activeColor = null;
+        if (clockIntervalId) {
+            clearInterval(clockIntervalId);
+            clockIntervalId = null;
+        }
+    }
+
+    function initClocks(minutes) {
+        stopClock();
+        clockPlayerSec = minutes * 60;
+        clockOpponentSec = minutes * 60;
+        renderClocks();
+    }
+
+    function startClockFromFen(fen) {
+        if (selectedMode !== "player") return;
+        if (!matchActive) return;
+
+        activeColor = getFenActiveColor(fen);
+        lastTickMs = Date.now();
+
+        if (!clockIntervalId) {
+            clockIntervalId = setInterval(tickClock, 200);
+        }
+        clockRunning = true;
+    }
+
+    function tickClock() {
+        if (!clockRunning || selectedMode !== "player") return;
+        if (!matchActive) return;
+        if (!activeColor) return;
+
+        var now = Date.now();
+        var elapsed = (now - lastTickMs) / 1000.0;
+        lastTickMs = now;
+
+        var playerColor = getPlayerColor();
+
+        if (activeColor === playerColor) {
+            clockPlayerSec -= elapsed;
+            if (clockPlayerSec <= 0) {
+                clockPlayerSec = 0;
+                renderClocks();
+                matchActive = false;
+                stopClock();
+                showGameOver("Time out! Winner: Opponent", "lose");
+                return;
+            }
+        } else {
+            clockOpponentSec -= elapsed;
+            if (clockOpponentSec <= 0) {
+                clockOpponentSec = 0;
+                renderClocks();
+                matchActive = false;
+                stopClock();
+                showGameOver("Time out! Winner: Player", "win", selectedSide);
+                return;
+            }
+        }
+
+        renderClocks();
+    }
 
     function setDisconnected() {
         $("#connectionStatus")
@@ -255,6 +353,9 @@
     }
 
     function prepareForNewGame() {
+        matchActive = false;
+        stopClock();
+
         $("#gameOverMessage").hide();
         $("#promotionPicker").hide();
         $("#startInputPopup").hide();
@@ -303,6 +404,15 @@
                 $("#resignBtn").fadeIn(120);
 
                 applyCheckHighlight(response.checkSquare, response.checkAttackers);
+
+                matchActive = true;
+
+                if (selectedMode === "player") {
+                    initClocks(selectedTime);
+                    startClockFromFen(response.fen);
+                } else {
+                    stopClock();
+                }
             }
         });
     }
@@ -390,6 +500,9 @@
     }
 
     function showGameOver(message, type, side) {
+        matchActive = false;
+        stopClock();
+
         $("#resignBtn").hide();
         $("#startInputPopup").hide();
         $("#promotionPicker").hide();
@@ -511,6 +624,10 @@
 
         applyCheckHighlight(response.checkSquare, response.checkAttackers);
 
+        if (selectedMode === "player" && response.fen) {
+            startClockFromFen(response.fen);
+        }
+
         if (response.winner) {
             if (response.winner === "Draw") {
                 showGameOver("Draw", "draw");
@@ -581,6 +698,9 @@
     });
 
     $('#resignBtn').click(function () {
+        matchActive = false;
+        stopClock();
+
         $("#promotionPicker").hide();
         $("#startInputPopup").hide();
 
@@ -603,6 +723,10 @@
                 lastFen = response.fen;
                 board.position(response.fen);
                 applyCheckHighlight(response.checkSquare, response.checkAttackers);
+
+                if (selectedMode === "player") {
+                    startClockFromFen(response.fen);
+                }
             } else if (response) {
                 applyCheckHighlight(response.checkSquare, response.checkAttackers);
             }
