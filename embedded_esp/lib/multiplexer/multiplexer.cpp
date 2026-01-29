@@ -13,7 +13,7 @@ Multiplexer::Multiplexer(int s0, int s1, int s2, int s3, int signal) :
     pinMode(s1_pin, OUTPUT);
     pinMode(s2_pin, OUTPUT);
     pinMode(s3_pin, OUTPUT);
-    pinMode(signal_pin, INPUT);
+    pinMode(signal_pin, INPUT_PULLUP);
 }
 
 /// @brief Reads the value from a specific channel of the multiplexer
@@ -22,13 +22,26 @@ Multiplexer::Multiplexer(int s0, int s1, int s2, int s3, int signal) :
 bool Multiplexer::readChannel(int channel) 
 {
     // Set the select pins based on the channel number
-    digitalWrite(s0_pin, (channel >> 3) & 0x01);
-    digitalWrite(s1_pin, (channel >> 2) & 0x01);
-    digitalWrite(s2_pin, (channel >> 1) & 0x01);
-    digitalWrite(s3_pin, channel & 0x01);
+    digitalWrite(s0_pin, (channel >> 0) & 0x01);
+    digitalWrite(s1_pin, (channel >> 1) & 0x01);
+    digitalWrite(s2_pin, (channel >> 2) & 0x01);
+    digitalWrite(s3_pin, (channel >> 3) & 0x01);
+
+    // Serial.print("Reading channel ");
+    // Serial.print(channel);
+    // Serial.print(": S0=");
+    // Serial.print((channel >> 0) & 0x01);
+    // Serial.print(" S1=");
+    // Serial.print((channel >> 1) & 0x01);
+    // Serial.print(" S2=");
+    // Serial.print((channel >> 2) & 0x01);
+    // Serial.print(" S3=");
+    // Serial.print((channel >> 3) & 0x01);
+    // Serial.print(" => Value=");
+    // Serial.println(digitalRead(signal_pin));
 
     // Read and return the signal pin state
-    return digitalRead(signal_pin);
+    return !digitalRead(signal_pin);
 }
 
 bool* Multiplexer::readAsArray(bool* array)
