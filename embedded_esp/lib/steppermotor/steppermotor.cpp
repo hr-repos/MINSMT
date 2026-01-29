@@ -26,3 +26,11 @@ void StepperMotor::moveRight(int steps) {
         delayMicroseconds(500);
     }
 }
+
+void StepperMotor::movetoPosition(int x, int y){
+    
+}
+
+void StepperMotor::moveToHome(){
+
+}

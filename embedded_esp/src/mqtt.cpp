@@ -1,5 +1,6 @@
 #include "functions.h"
 #include "config.h"
+#include "logic.h"
 
 void reconnectMqtt() {
     // Loop until we're reconnected
@@ -13,18 +14,26 @@ void reconnectMqtt() {
             Serial.println("mqtt connected");
 
             // Once connected, publish an announcement...
-            client.publish("board/status", "board connected");
+            // client.publish("board/status", "board connected");
 
             // ... and resubscribe
             // client.subscribe("topic1");
-            client.subscribe(String(playCode).c_str());
+            Serial.println("Subscribing to topics:");
+            String topicAlive = playcodeString + "/alive/external";
+            String topicMove = playcodeString + "/move/external";
+            String topicCheckmate = playcodeString + "/checkmate";
+            Serial.println(topicAlive);
+            Serial.println(topicMove);
+            client.subscribe(topicAlive.c_str());
+            client.subscribe(topicMove.c_str());
+            client.subscribe(topicCheckmate.c_str());
         } else 
         {
             Serial.print("failed, rc=");
             Serial.print(client.state());
             Serial.println(" try again in 5 seconds");
             // Wait 5 seconds before retrying
-            delay(5000);
+            delay(2000);
         }
     }
 }
@@ -50,12 +59,14 @@ void callback(char* topic, byte* payload, unsigned int length)
     if (strcmp(topic, (playcodeString + "/move/external").c_str() ) == 0)
     {
         Serial.println("The opponent has made a move: " + String(message));
-        
+        int fromX, fromY, toX, toY;
+        moveStrToCoords(message, fromX, fromY, toX, toY);
+        Serial.printf("Move from (%d, %d) to (%d, %d)\n", fromX, fromY, toX, toY);
     }
 
     if (strcmp(topic, (playcodeString + "/alive/external").c_str() ) == 0)
     {
-        Serial.println("The opponent is alive: " + String(message));
+        // Serial.println("The opponent is alive: " + String(message));
         timerOpponentCheck.resetTimer();
         digitalWrite(pinInactiveOpponentIndicator, LOW); // Test action
     }
@@ -63,6 +74,8 @@ void callback(char* topic, byte* payload, unsigned int length)
     if (strcmp(topic, (playcodeString + "/checkmate").c_str() ) == 0)
     {
         Serial.println("Checkmate received from opponent.");
+        lcd.clearDisplay();
+        lcd.setTextFirstLine("Checkmate!");
         currentGameState = CHECKMATE;
     }
 }

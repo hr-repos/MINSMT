@@ -7,6 +7,7 @@
 #include "multiplexer.h"
 #include "lcd.h"
 #include "timer.h"
+#include "steppermotor.h"
 
 #define BOARDWIDTHHIGHT 8
 #define MULTIPLEXERS_COUNT 4
@@ -29,6 +30,8 @@ enum gameState {
 
 extern bool lastState[BOARDWIDTHHIGHT][BOARDWIDTHHIGHT];
 extern Multiplexer* multiPlexers[MULTIPLEXERS_COUNT];  
+extern StepperMotor stepperMotor1;
+extern StepperMotor stepperMotor2;
 extern WiFiClient espClient;                          
 extern PubSubClient client;   
 extern int playCode; 
