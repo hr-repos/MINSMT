@@ -115,15 +115,15 @@ public static class ChessboardService
         return null;
     }
 
-    public static (int elo, int depth) GetDifficultySettings()
+    public static (int elo, int movetime) GetDifficultySettings()
     {
         return Difficulty switch
         {
-            AIDifficulty.Beginner      => (300, 1),
-            AIDifficulty.Intermediate  => (1000, 5),
-            AIDifficulty.Expert        => (1600, 7),
-            AIDifficulty.Master        => (2300, 18),
-            _                          => (300, 1)
+            AIDifficulty.Beginner      => (300, 3),
+            AIDifficulty.Intermediate  => (1000, 20),
+            AIDifficulty.Expert        => (1600, 50),
+            AIDifficulty.Master        => (2300, 120),
+            _                          => (300, 5)
         };
     }
 
