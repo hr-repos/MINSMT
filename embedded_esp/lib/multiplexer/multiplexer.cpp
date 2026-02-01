@@ -40,6 +40,8 @@ bool Multiplexer::readChannel(int channel)
     // Serial.print(" => Value=");
     // Serial.println(digitalRead(signal_pin));
 
+    // Small delay to prevent reading errors from the previous read pin
+    delayMicroseconds(5);
     // Read and return the signal pin state
     return !digitalRead(signal_pin);
 }

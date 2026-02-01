@@ -13,4 +13,7 @@ int generatePlayCode();
 template <size_t N>
 std::string createMoveStr(const bool (&before)[N][N], const bool (&after)[N][N]);
 
+template <size_t N>
+bool hasMoved(const bool (&before)[N][N], const bool (&after)[N][N]);
+
 void moveStrToCoords(char* moveStr, int& fromX, int& fromY, int& toX, int& toY);   

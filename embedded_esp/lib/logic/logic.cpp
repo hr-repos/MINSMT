@@ -1,5 +1,6 @@
 #include "logic.h"
 #include <iostream>
+// #include "Arduino.h"
 
 /**
  * @brief Checks if the board is in the starting position
@@ -9,7 +10,7 @@
 template <size_t N>
 bool isStartPosition(const bool (&board)[N][N]){
     if (N != 8) {
-        std::cout << "Invalid board size. Only 8x8 boards are supported." << std::endl;
+        // std::cout << "Invalid board size. Only 8x8 boards are supported." << std::endl;
     }
     for (int row = 0; row < N; row++)
     {
@@ -20,6 +21,7 @@ bool isStartPosition(const bool (&board)[N][N]){
                 // If the first two or last two rows are missing a piece, return false
                 if(board[row][column] == false) 
                 {
+                    std::cout << "Missing piece at row " << row << ", column " << column << std::endl;
                     return false;
                 } 
             } 
@@ -28,6 +30,7 @@ bool isStartPosition(const bool (&board)[N][N]){
                 // If any of the middle rows have a piece, return false
                 if(board[row][column] == true) 
                 {
+                    // std::cout << "Unexpected piece at row " << row << ", column " << column << std::endl;
                     return false;
                 } 
             }
@@ -87,10 +90,36 @@ std::string createMoveStr(const bool (&before)[N][N], const bool (&after)[N][N])
     // Return empty string if no valid move detected
     return "";
 }
+/// @brief Checks if a move has been made between two board states
+/// @tparam N is the width and height of the board
+/// @param before is the board state before the move
+/// @param after  is the board state after the move
+/// @return true if a move has been made, false otherwise
+template <size_t N>
+bool hasMoved(const bool (&before)[N][N], const bool (&after)[N][N]){
+    int counter = 0;
+    bool changed = false;
+    for (int row = 0; row < N; row++)
+    {
+        for (int column = 0; column < N; column++) 
+        {
+            if (before[row][column] != after[row][column]){
+                changed = true;
+            }
+            if (after[row][column] == true){
+                counter++;
+            }
+        }
+    }
+    // only return true if exactly one piece has moved (32 pieces should be on the board)
+    // the counter makes sure that if the piece is picked up but not placed back, it does not count as a move
+    return changed && counter == 32;
+}
 
 // Explicit template instantiations for common board sizes
 template bool isStartPosition<8>(const bool (&board)[8][8]);
 template std::string createMoveStr<8>(const bool (&before)[8][8], const bool (&after)[8][8]);
+template bool hasMoved<8>(const bool (&before)[8][8], const bool (&after)[8][8]);
 
 void moveStrToCoords(char* moveStr, int& fromX, int& fromY, int& toX, int& toY){
     // Example moveStr: "e2e4"

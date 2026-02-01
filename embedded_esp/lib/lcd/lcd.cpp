@@ -13,12 +13,12 @@ void LcdModule::initialize(){
     changeBackLightState(true);
 }
 
-void LcdModule::setTextFirstLine(char *text) {
+void LcdModule::setTextFirstLine(const char *text) {
     lcd.setCursor(0, 0);
     lcd.print(text);
 }
 
-void LcdModule::setTextSecondLine(char *text){
+void LcdModule::setTextSecondLine(const char *text){
     lcd.setCursor(0, 1);
     lcd.print(text);
 }
@@ -27,8 +27,8 @@ void LcdModule::setTextSecondLine(int number){
     lcd.print(number);
 }
 
-void LcdModule::setTextLineWrap(char *text){
-
+void LcdModule::setTextLineWrap(const char *text){
+    throw "Not implemented yet";
 }
 
 void LcdModule::clearLineOne(){

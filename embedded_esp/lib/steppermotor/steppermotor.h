@@ -9,7 +9,8 @@ class StepperMotor {
         int directionPin;
         int stepPin;
     public:
-        StepperMotor(int dirPin, int stepPin); // Constructor
+        int stepsPerSquare;
+        StepperMotor(int dirPin, int stepPin, int stepsPerSquare); // Constructor
         void movetoPosition(int x, int y);
         void moveLeft(int steps);
         void moveRight(int steps);

@@ -24,12 +24,13 @@ void setup_wifi(const char *ssid, const char *password);
 bool lastState[BOARDWIDTHHIGHT][BOARDWIDTHHIGHT] = {false};
 // Contains multiplexer objects for all 4 multiplexers
 Multiplexer* multiPlexers[MULTIPLEXERS_COUNT];  // defined as extern in config.h
-StepperMotor stepperMotor1(32,33);  // Stepper motor object
-StepperMotor stepperMotor2(25,26);  // Stepper motor object
+StepperMotor stepperMotor1(32,33, 200);  // Stepper motor object
+StepperMotor stepperMotor2(25,26, 200);  // Stepper motor object
 WiFiClient espClient;                           // defined as extern in config.h
 PubSubClient client(espClient);                 // defined as extern in config.h
 
 LcdModule lcd;                                  // LCD module object
+uint8_t pinMagneet = 30; // GPIO pin to indicate inactive opponent
 
 int playCode = 6933;//generatePlayCode();              // defined as extern in config.h // unique play code for this game session - is used as mqtt topic
 String playcodeString = String(playCode);
@@ -38,9 +39,10 @@ gameState currentGameState = WAITING_FOR_PLAYERS;
 Timer timerKeepAlive(5000); // 5 seconds keepalive timer
 Timer timerOpponentCheck(10000); // 10 seconds opponent check timer
 
-uint8_t pinInactiveOpponentIndicator = BUILTIN_LED; // GPIO pin to indicate inactive opponent
 uint8_t pinbuttonReset = 4; // GPIO pin to indicate inactive opponent
 uint8_t pinbuttonShutdown = 16; // GPIO pin to indicate inactive opponent
+uint8_t pinLedBoardsTurn = 27; // GPIO pin to indicate inactive opponent
+uint8_t pinLedInactiveOpponentIndicator = 14; // GPIO pin to indicate inactive opponent
 
 void setup()
 {
@@ -56,25 +58,26 @@ void setup()
 
     lcd.initialize();
 
-    pinMode(pinInactiveOpponentIndicator, OUTPUT);
+    pinMode(pinLedInactiveOpponentIndicator, OUTPUT);
+    pinMode(pinLedBoardsTurn, OUTPUT);
     
-    readBoardState(lastState);
-    lcd.setTextFirstLine("Reset the board to start playing");
+    readBoardState(MULTIPLEXERS_COUNT, MULTIPLEXER_CHANNELS_COUNT, lastState);
+    lcd.setTextFirstLine("Setup the board");
+    lcd.setTextSecondLine("to start playing");
     delay(2000);
 
     // If the board is (re)started it must be in the starting position to continue
-    while (!(lastState))
+    while (!isStartPosition(lastState))
     {
         Serial.println("\tWaiting for players to set up the board...");
         delay(2000);
-        readBoardState(lastState);
+        readBoardState(MULTIPLEXERS_COUNT, MULTIPLEXER_CHANNELS_COUNT, lastState);
         // break; // temperary break to allow testing without board
     }
     
     Serial.println("Board set up correctly.");
-
+    lcd.clearDisplay();
     lcd.setTextFirstLine("Share this code:");
-    // String playcodeString = String(playCode);
     lcd.setTextSecondLine(playCode);
 
     setup_wifi(WIFI_SSID, WIFI_PASSWORD);
@@ -97,24 +100,30 @@ void loop()
     if (currentGameState == WAITING_FOR_BOARD_MOVE)
     {
         bool currentState[BOARDWIDTHHIGHT][BOARDWIDTHHIGHT];
-        readBoardState(currentState);
-        std::string move = createMoveStr(lastState, currentState);
-        sendMessage((playcodeString + "/move/board").c_str(), move.c_str());
-        memcpy(lastState, currentState, sizeof(lastState));
-        currentGameState = WAITING_FOR_OPPONENT_MOVE;
+        readBoardState(MULTIPLEXERS_COUNT, MULTIPLEXER_CHANNELS_COUNT, currentState);
+        if (hasMoved(lastState, currentState)) 
+        {
+            Serial.println("Board changed, processing move...");
+            digitalWrite(pinLedBoardsTurn, LOW); // Turn off "board's turn" indicator
+            std::string move = createMoveStr(lastState, currentState);
+            sendMessage((playcodeString + "/move/board").c_str(), move.c_str());
+            memcpy(lastState, currentState, sizeof(lastState));
+            currentGameState = WAITING_FOR_OPPONENT_MOVE;
+        }
     }
 
     if (timerKeepAlive.checkTimer()) 
     {
         sendMessage((playcodeString + "/alive/board").c_str(), "board alive");
-        stepperMotor2.moveLeft(700);
-        stepperMotor2.moveRight(700);
+        // stepperMotor1.moveLeft(300);
+        // stepperMotor1.moveRight(300);
+        // Serial.println("moved");
     }
 
     if (timerOpponentCheck.checkTimer()) 
     {
         Serial.println("Opponent inactive...");
-        digitalWrite(pinInactiveOpponentIndicator, HIGH);
+        digitalWrite(pinLedInactiveOpponentIndicator, HIGH);
     }
 
     if (pinbuttonReset == HIGH) 

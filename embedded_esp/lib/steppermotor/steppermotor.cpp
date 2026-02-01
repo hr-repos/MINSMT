@@ -1,6 +1,6 @@
 #include "steppermotor.h"
 
-StepperMotor::StepperMotor(int dirPin, int stepPin) : directionPin(dirPin), stepPin(stepPin) {
+StepperMotor::StepperMotor(int dirPin, int stepPin, int stepsPerSquare) : directionPin(dirPin), stepPin(stepPin), stepsPerSquare(stepsPerSquare) {
     pinMode(directionPin, OUTPUT);
     pinMode(stepPin, OUTPUT);
 }

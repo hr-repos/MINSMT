@@ -39,4 +39,6 @@ extern String playcodeString;
 extern LcdModule lcd;   
 extern gameState currentGameState;
 extern Timer timerOpponentCheck;
-extern uint8_t pinInactiveOpponentIndicator;
+extern uint8_t pinLedInactiveOpponentIndicator;
+extern uint8_t pinLedBoardsTurn;
+extern uint8_t pinMagneet;

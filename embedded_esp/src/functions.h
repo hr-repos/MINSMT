@@ -9,5 +9,5 @@ void sendMove();
 void sendMessage(const char* topic, const char* message);
 
 // boardfn.cpp
-void readBoardState(bool board[BOARDWIDTHHIGHT][BOARDWIDTHHIGHT]);
+void readBoardState(int muxCount, int channelCount, bool board[BOARDWIDTHHIGHT][BOARDWIDTHHIGHT]);
 void moveLoop();

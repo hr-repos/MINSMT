@@ -22,11 +22,16 @@ void reconnectMqtt() {
             String topicAlive = playcodeString + "/alive/external";
             String topicMove = playcodeString + "/move/external";
             String topicCheckmate = playcodeString + "/checkmate";
+            String boardColor = playcodeString + "/boardcolor";
+
             Serial.println(topicAlive);
             Serial.println(topicMove);
+            Serial.println(topicCheckmate);
+            Serial.println(boardColor);
             client.subscribe(topicAlive.c_str());
             client.subscribe(topicMove.c_str());
             client.subscribe(topicCheckmate.c_str());
+            client.subscribe(boardColor.c_str());
         } else 
         {
             Serial.print("failed, rc=");
@@ -62,13 +67,41 @@ void callback(char* topic, byte* payload, unsigned int length)
         int fromX, fromY, toX, toY;
         moveStrToCoords(message, fromX, fromY, toX, toY);
         Serial.printf("Move from (%d, %d) to (%d, %d)\n", fromX, fromY, toX, toY);
+
+        // check if a piece is captured and move it first if so
+        if (lastState[toX][toY]) {
+            stepperMotor1.moveRight(toX * stepperMotor1.stepsPerSquare);
+            stepperMotor2.moveRight(toY * stepperMotor2.stepsPerSquare);
+            digitalWrite(pinMagneet, HIGH); // Activate magnet to pick up piece
+            stepperMotor1.moveLeft(50); // Small lift to avoid collision
+            stepperMotor2.moveRight(stepperMotor2.stepsPerSquare - toY * stepperMotor2.stepsPerSquare); // Small lift to avoid collision
+            // code to move back to home here
+        }
+
+
+        currentGameState = WAITING_FOR_BOARD_MOVE;
+        digitalWrite(pinLedBoardsTurn, HIGH); // Turn on "board's turn" indicator
+    }
+
+    if (strcmp(topic, (playcodeString + "/boardcolor").c_str() ) == 0){
+        if (currentGameState == WAITING_FOR_PLAYERS) {
+            // bij 0 mag het dashboard beginnen (is wit), bij 1 begint het bord (dashboard is zwart)
+            if (message[0] == '0') {
+                currentGameState = WAITING_FOR_OPPONENT_MOVE;
+                digitalWrite(pinLedBoardsTurn, LOW);
+            }
+            else {
+                currentGameState = WAITING_FOR_BOARD_MOVE;
+                digitalWrite(pinLedBoardsTurn, HIGH);
+            }
+        }
     }
 
     if (strcmp(topic, (playcodeString + "/alive/external").c_str() ) == 0)
     {
         // Serial.println("The opponent is alive: " + String(message));
         timerOpponentCheck.resetTimer();
-        digitalWrite(pinInactiveOpponentIndicator, LOW); // Test action
+        digitalWrite(pinLedInactiveOpponentIndicator, LOW); // Test action
     }
 
     if (strcmp(topic, (playcodeString + "/checkmate").c_str() ) == 0)

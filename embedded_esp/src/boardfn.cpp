@@ -5,30 +5,44 @@
 /// @brief Reads the state of the entire board and updates the lastState array
 /// @param board A 2D array representing the board state)
 /// @test Serial.printf("y: %d\tx: %d\tch: %d\n", h, w, channel);
-/// @note The board here is not a copy but a reference to the original array when compiled 
-void readBoardState(bool board[BOARDWIDTHHIGHT][BOARDWIDTHHIGHT])
+/// @note The board here is not a copy but a reference to array the data will be stored in
+void readBoardState(int muxCount, int channelCount, bool board[BOARDWIDTHHIGHT][BOARDWIDTHHIGHT])
 {
-    for (int mPlexer = 0; mPlexer < MULTIPLEXERS_COUNT; mPlexer++)
-    { 
-        for (int channel = 0; channel < MULTIPLEXER_CHANNELS_COUNT; channel++)
+    // Serial.println("Reading board state...");
+    // Loop over all 4 multiplexers
+    for (int mux = 0; mux < muxCount; mux++)
+    {
+        // Each multiplexer fills 2 rows
+        int baseRow = mux * 2;
+
+        // Loop over all 16 channels of the multiplexer
+        for (int channel = 0; channel < channelCount; channel++)
         {
-            int w = mPlexer * 2 + (channel / BOARDWIDTHHIGHT);
-            int h = channel % BOARDWIDTHHIGHT; // 7- because the highest row of the board is 7
-            board[w][h] = multiPlexers[mPlexer]->readChannel(channel);
+            // Determine which of the 2 rows this channel belongs to
+            int rowOffset = channel / 8;   // 0 for channels 0–7, 1 for 8–15
+            int row = baseRow + rowOffset;
+
+            // Determine column inside the row
+            int col = channel % 8;         // 0–7
+
+            // Read the channel and store it in the board
+            board[row][col] = multiPlexers[mux]->readChannel(channel);
+            if (board[row][col]) {
+                // Serial.printf("Piece detected at row %d, column %d (mux %d, channel %d)\n", row, col, mux, channel);
+            }
         }
     }
 }
 
 
 
-// /// @brief Contains the main game loop for handling moves
-// void moveLoop(){
-//     String move = createMoveStr(/*before*/{}, /*after*/{});
+/// @brief handles incoming move from opponent
+void move(){
+    // String move = createMoveStr(/*before*/{}, /*after*/{});
 
 
 
-//     delay(1000); // Placeholder for actual move handling logic
-//     currentGameState = WAITING_FOR_OPPONENT_MOVE; // Placeholder to change game state
-//     sendMove();
-// }
+    delay(1000); // Placeholder for actual move handling logic
+    currentGameState = WAITING_FOR_OPPONENT_MOVE; // Placeholder to change game state
+}
 

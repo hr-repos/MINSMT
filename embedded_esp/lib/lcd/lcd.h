@@ -15,10 +15,10 @@ class LcdModule
         
         // LcdModule();
         void initialize();
-        void setTextFirstLine(char *text);
-        void setTextSecondLine(char *text);
+        void setTextFirstLine(const char *text);
+        void setTextSecondLine(const char *text);
         void setTextSecondLine(int number);
-        void setTextLineWrap(char *text);
+        void setTextLineWrap(const char *text);
         void clearLineOne();
         void clearLineTwo();
         void clearDisplay();
