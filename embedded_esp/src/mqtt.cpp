@@ -72,14 +72,16 @@ void callback(char* topic, byte* payload, unsigned int length)
         Serial.printf("Move from (%d, %d) to (%d, %d)\n", fromX, fromY, toX, toY);
 
         // check if a piece is captured and move it first if so
-        // if (lastMoveState[toX][toY]) {
+        if (lastMoveState[toX][toY]) {
+            // coords must follow array indexing instead of chess notation so upper left = 0,0
+            movePiece(toX, toY, 8, 8, pinMagneet); // move captured piece off the board
         //     stepperMotor1.moveRight(toX * stepperMotor1.stepsPerSquare);
         //     stepperMotor2.moveRight(toY * stepperMotor2.stepsPerSquare);
         //     digitalWrite(pinMagneet, HIGH); // Activate magnet to pick up piece
         //     stepperMotor1.moveLeft(50); // Small lift to avoid collision
         //     stepperMotor2.moveRight(stepperMotor2.stepsPerSquare - toY * stepperMotor2.stepsPerSquare); // Small lift to avoid collision
         //     // code to move back to home here
-        // }
+        }
 
 
         currentGameState = WAITING_FOR_BOARD_MOVE;

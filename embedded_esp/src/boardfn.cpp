@@ -35,6 +35,49 @@ void readBoardState(int muxCount, int channelCount, bool board[BOARDWIDTHHIGHT][
     }
 }
 
+/// @brief Moves a piece from one position to another using the stepper motors and electromagnet
+/// @param fromX Location of the piece to be moved on the X axis (A-H)
+/// @param fromY Location of the piece to be moved on the Y axis (1-8)
+/// @param toX Location to move the piece to on the X axis (A-H)
+/// @param toY Location to move the piece to on the Y axis (1-8)
+/// @note Expects the coordinates in 0-7 range
+/// @note Expect the 'to' location to be empty 
+/// @note Expects the starting position of the magnet to be at home (A8 -> 0,0)
+void movePiece(int fromX, int fromY, int toX, int toY, int magnetPin) {
+    if (fromX != 0) {
+        // magent to the right
+        stepperMotor2.moveRight(fromX * stepperMotor2.stepsPerSquare);        
+    }
+
+    if (fromY != 0) {
+        // magnet down
+        stepperMotor1.moveRight(fromY * stepperMotor1.stepsPerSquare);        
+    }
+
+    digitalWrite(magnetPin, HIGH); // Activate magnet to pick up piece
+
+
+
+
+
+    // Move the piece in the middle of two pieces so it can be safely mved 
+    // without colliding with other pieces
+    if (toX != 7 || fromX != 7) {
+        stepperMotor2.moveRight(stepperMotor2.stepsPerSquare / 2);
+    }
+    else {
+        stepperMotor2.moveLeft(stepperMotor2.stepsPerSquare / 2);
+    }
+
+    stepperMotor1.moveRight(fromX * stepperMotor1.stepsPerSquare);
+}
+
+
+
+
+
+
+
 int currentPiecesCount = 32;
 bool firstPiecePickedUp[BOARDWIDTHHIGHT][BOARDWIDTHHIGHT]= {false};
 
@@ -71,6 +114,7 @@ void handleBoardMove(){
                 currentGameState = WAITING_FOR_OPPONENT_MOVE;
                 break;
             }
+
             // A second piece is picked up which indicated a capture
             // The correct location will be set manually here so the board state is up 
             // to date before sending the move to the dashboard

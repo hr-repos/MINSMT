@@ -15,6 +15,7 @@ class StepperMotor {
         void movetoPosition(int x, int y);
         void moveLeft(int steps);
         void moveRight(int steps);
+        void move(int steps);
         void moveToHome();
 };
 

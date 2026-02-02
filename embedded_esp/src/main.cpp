@@ -21,6 +21,7 @@ void readBoardState(bool board[BOARDWIDTHHIGHT][BOARDWIDTHHIGHT]);
 void setup_wifi(const char *ssid, const char *password);
 
 // stores if a piece is detected on the corresponding place on the board
+bool lastLastMoveState[BOARDWIDTHHIGHT][BOARDWIDTHHIGHT] = {false};
 bool lastMoveState[BOARDWIDTHHIGHT][BOARDWIDTHHIGHT] = {false};
 // Contains multiplexer objects for all 4 multiplexers
 Multiplexer* multiPlexers[MULTIPLEXERS_COUNT];  // defined as extern in config.h

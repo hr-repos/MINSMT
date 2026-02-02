@@ -12,3 +12,4 @@ void sendMessage(const char* topic, const char* message);
 void readBoardState(int muxCount, int channelCount, bool board[BOARDWIDTHHIGHT][BOARDWIDTHHIGHT]);
 void moveLoop();
 void handleBoardMove();
+void movePiece(int fromX, int fromY, int toX, int toY, int magnetPin);

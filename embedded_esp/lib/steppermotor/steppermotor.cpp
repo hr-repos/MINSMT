@@ -29,6 +29,16 @@ void StepperMotor::moveRight(int steps) {
     }
 }
 
+/// @brief Moves the stepper motor a specified number of steps in either direction
+/// @param steps Number of steps to move (positive for right, negative for left)
+void StepperMotor::move(int steps) {
+    if (steps > 0) {
+        moveRight(steps);
+    } else if (steps < 0) {
+        moveLeft(-steps);
+    }
+}
+
 void StepperMotor::movetoPosition(int x, int y){
     
 }
