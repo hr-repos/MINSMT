@@ -23,15 +23,18 @@ void reconnectMqtt() {
             String topicMove = playcodeString + "/move/external";
             String topicCheckmate = playcodeString + "/checkmate";
             String boardColor = playcodeString + "/boardcolor";
+            String topicIllegalMove = playcodeString + "/illegalmove";
 
             Serial.println(topicAlive);
             Serial.println(topicMove);
             Serial.println(topicCheckmate);
             Serial.println(boardColor);
+            Serial.println(topicIllegalMove);
             client.subscribe(topicAlive.c_str());
             client.subscribe(topicMove.c_str());
             client.subscribe(topicCheckmate.c_str());
             client.subscribe(boardColor.c_str());
+            client.subscribe(topicIllegalMove.c_str());
         } else 
         {
             Serial.print("failed, rc=");
@@ -69,14 +72,14 @@ void callback(char* topic, byte* payload, unsigned int length)
         Serial.printf("Move from (%d, %d) to (%d, %d)\n", fromX, fromY, toX, toY);
 
         // check if a piece is captured and move it first if so
-        if (lastState[toX][toY]) {
-            stepperMotor1.moveRight(toX * stepperMotor1.stepsPerSquare);
-            stepperMotor2.moveRight(toY * stepperMotor2.stepsPerSquare);
-            digitalWrite(pinMagneet, HIGH); // Activate magnet to pick up piece
-            stepperMotor1.moveLeft(50); // Small lift to avoid collision
-            stepperMotor2.moveRight(stepperMotor2.stepsPerSquare - toY * stepperMotor2.stepsPerSquare); // Small lift to avoid collision
-            // code to move back to home here
-        }
+        // if (lastState[toX][toY]) {
+        //     stepperMotor1.moveRight(toX * stepperMotor1.stepsPerSquare);
+        //     stepperMotor2.moveRight(toY * stepperMotor2.stepsPerSquare);
+        //     digitalWrite(pinMagneet, HIGH); // Activate magnet to pick up piece
+        //     stepperMotor1.moveLeft(50); // Small lift to avoid collision
+        //     stepperMotor2.moveRight(stepperMotor2.stepsPerSquare - toY * stepperMotor2.stepsPerSquare); // Small lift to avoid collision
+        //     // code to move back to home here
+        // }
 
 
         currentGameState = WAITING_FOR_BOARD_MOVE;
@@ -111,6 +114,14 @@ void callback(char* topic, byte* payload, unsigned int length)
         lcd.setTextFirstLine("Checkmate!");
         currentGameState = CHECKMATE;
     }
+    if (strcmp(topic, (playcodeString + "/illegalmove").c_str() ) == 0)
+    {
+        Serial.println("Illegal move received from opponent.");
+        currentGameState = WAITING_FOR_BOARD_MOVE;
+        digitalWrite(pinLedBoardsTurn, HIGH); // Turn on "board's turn" indicator
+        // while(true){}
+    }
+        
 }
 
 void sendMove() {

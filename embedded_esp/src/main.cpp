@@ -24,8 +24,8 @@ void setup_wifi(const char *ssid, const char *password);
 bool lastState[BOARDWIDTHHIGHT][BOARDWIDTHHIGHT] = {false};
 // Contains multiplexer objects for all 4 multiplexers
 Multiplexer* multiPlexers[MULTIPLEXERS_COUNT];  // defined as extern in config.h
-StepperMotor stepperMotor1(32,33, 200);  // Stepper motor object
-StepperMotor stepperMotor2(25,26, 200);  // Stepper motor object
+StepperMotor stepperMotor1(25,26, 0, 200);  // 1-7 as 
+StepperMotor stepperMotor2(32,33, 2, 200);  // a-h as (met de magneet)
 WiFiClient espClient;                           // defined as extern in config.h
 PubSubClient client(espClient);                 // defined as extern in config.h
 
@@ -106,6 +106,7 @@ void loop()
             Serial.println("Board changed, processing move...");
             digitalWrite(pinLedBoardsTurn, LOW); // Turn off "board's turn" indicator
             std::string move = createMoveStr(lastState, currentState);
+            Serial.println("Detected move: " + String(move.c_str()));
             sendMessage((playcodeString + "/move/board").c_str(), move.c_str());
             memcpy(lastState, currentState, sizeof(lastState));
             currentGameState = WAITING_FOR_OPPONENT_MOVE;
@@ -155,6 +156,7 @@ void setup_wifi(const char* ssid, const char* password)
     Serial.print("MAC address: ");
     Serial.println(WiFi.macAddress());
     Serial.print("Connecting to ");
+    Serial.println(ssid);
 
     WiFi.mode(WIFI_STA);
     WiFi.begin(ssid, password);

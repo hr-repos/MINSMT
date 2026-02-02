@@ -1,13 +1,15 @@
 #include "steppermotor.h"
 
-StepperMotor::StepperMotor(int dirPin, int stepPin, int stepsPerSquare) : directionPin(dirPin), stepPin(stepPin), stepsPerSquare(stepsPerSquare) {
+StepperMotor::StepperMotor(int dirPin, int stepPin, int sleepPin, int stepsPerSquare) : 
+directionPin(dirPin), stepPin(stepPin), sleepPin(sleepPin), stepsPerSquare(stepsPerSquare) {
     pinMode(directionPin, OUTPUT);
     pinMode(stepPin, OUTPUT);
+    pinMode(sleepPin, OUTPUT);
 }
 
 void StepperMotor::moveLeft(int steps) {
     digitalWrite(directionPin ,HIGH); // Set Dir high
-    for(int i = 0; i < 200; i++) // Loop 200 times
+    for(int i = 0; i < steps; i++) // Loop 200 times
     {
         digitalWrite(stepPin, HIGH);
         delayMicroseconds(500);
@@ -18,7 +20,7 @@ void StepperMotor::moveLeft(int steps) {
 
 void StepperMotor::moveRight(int steps) {
     digitalWrite(directionPin, LOW); // Set Dir low
-    for(int i = 0; i < 200; i++) // Loop 200 times
+    for(int i = 0; i < steps; i++) // Loop 200 times
     {
         digitalWrite(stepPin, HIGH);
         delayMicroseconds(500);

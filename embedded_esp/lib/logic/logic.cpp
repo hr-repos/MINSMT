@@ -22,7 +22,10 @@ bool isStartPosition(const bool (&board)[N][N]){
                 if(board[row][column] == false) 
                 {
                     std::cout << "Missing piece at row " << row << ", column " << column << std::endl;
-                    return false;
+                    // if (row != 6 && column != 0){
+                        // std::cout << "Debug info: position (6,0) is false" << std::endl;
+                        return false;
+                    // }
                 } 
             } 
             else
@@ -30,7 +33,7 @@ bool isStartPosition(const bool (&board)[N][N]){
                 // If any of the middle rows have a piece, return false
                 if(board[row][column] == true) 
                 {
-                    // std::cout << "Unexpected piece at row " << row << ", column " << column << std::endl;
+                    std::cout << "Unexpected piece at row " << row << ", column " << column << std::endl;
                     return false;
                 } 
             }
@@ -111,6 +114,7 @@ bool hasMoved(const bool (&before)[N][N], const bool (&after)[N][N]){
             }
         }
     }
+    std::cout << "Checking for move..., Counter: " << counter << " changed: " << changed << std::endl;
     // only return true if exactly one piece has moved (32 pieces should be on the board)
     // the counter makes sure that if the piece is picked up but not placed back, it does not count as a move
     return changed && counter == 32;
