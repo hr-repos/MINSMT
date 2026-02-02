@@ -91,8 +91,44 @@ std::string createMoveStr(const bool (&before)[N][N], const bool (&after)[N][N])
     }
     
     // Return empty string if no valid move detected
+    std::cout << "Error creating move string with capture: invalid positions detected." << std::endl;
     return "";
 }
+
+/// @brief This function creates a move string based on the board state before, inbetween and 
+/// after a move with capture (eg. e4d5)
+/// @tparam N is the width and height of the board
+/// @param before The state before a move has been made
+/// @param firstPiecePickedUp The state when the first piece was picked up
+/// @param secondPiecePickedUp The state when the second piece was picked up
+/// @return 
+template <size_t N>
+std::string createMoveStr(const bool (&before)[N][N], const bool (&firstPiecePickedUp)[N][N],const bool (&secondPiecePickedUp)[N][N]){
+    std::pair<int, int> fromPos = detectChange(before, firstPiecePickedUp);
+    std::pair<int, int> toPos = detectChange(firstPiecePickedUp, secondPiecePickedUp);
+
+    if (fromPos != std::make_pair(-1, -1) && toPos != std::make_pair(-1, -1)) {
+        char fromX = 'a' + fromPos.second;
+        int fromY = N - fromPos.first;
+        char toX = 'a' + toPos.second;
+        int toY = N - toPos.first;
+
+        std::string s;
+        s.push_back(fromX);
+        s += std::to_string(fromY);
+        s.push_back(toX);
+        s += std::to_string(toY);
+        return s;
+    }
+    
+    std::cout << "Error creating move string with capture: invalid positions detected." << std::endl;
+    // Return empty string if no valid move detected
+    return "";
+}
+
+
+
+
 /// @brief Checks if a move has been made between two board states
 /// @tparam N is the width and height of the board
 /// @param before is the board state before the move
@@ -120,10 +156,55 @@ bool hasMoved(const bool (&before)[N][N], const bool (&after)[N][N]){
     return changed && counter == 32;
 }
 
+template <size_t N>
+void movetest(const bool (&before)[N][N], const bool (&after)[N][N]){
+
+}
+
+
+/// @brief This function detects a single change between two board states and returns the coordinates of the changed cell 
+/// @tparam N is the width and height of the board
+/// @param first The first board change
+/// @param second the next board state
+/// @return std::pair<row, column> of the changed cell, or (-1, -1) if no change detected
+template <size_t N>
+std::pair<int, int> detectChange(const bool (&first)[N][N], const bool (&second)[N][N]){
+    for (int row = 0; row < N; row++)
+    {
+        for (int column = 0; column < N; column++) 
+        {
+            if (first[row][column] != second[row][column]){
+                return std::make_pair(row, column);
+            }
+        }
+    }
+    return std::make_pair(-1, -1); // No move detected
+}
+
+template <size_t N>
+int countPieces(const bool (&first)[N][N]){
+    int counter = 0;
+    for (int row = 0; row < N; row++)
+    {
+        for (int column = 0; column < N; column++) 
+        {
+            if (first[row][column] == true){
+                counter++;
+            }
+        }
+    }
+    return counter;
+}
+
+
+
 // Explicit template instantiations for common board sizes
 template bool isStartPosition<8>(const bool (&board)[8][8]);
 template std::string createMoveStr<8>(const bool (&before)[8][8], const bool (&after)[8][8]);
 template bool hasMoved<8>(const bool (&before)[8][8], const bool (&after)[8][8]);
+template std::pair<int, int> detectChange<8>(const bool (&before)[8][8], const bool (&after)[8][8]);
+template int countPieces<8>(const bool (&first)[8][8]);
+template std::string createMoveStr<8>(const bool (&before)[8][8], const bool (&firstPiecePickedUp)[8][8],const bool (&secondPiecePickedUp)[8][8]);
 
 void moveStrToCoords(char* moveStr, int& fromX, int& fromY, int& toX, int& toY){
     // Example moveStr: "e2e4"

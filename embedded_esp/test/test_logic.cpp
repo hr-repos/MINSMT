@@ -257,6 +257,254 @@ void test_createMoveStr_invalid_multiple_changes() {
     TEST_ASSERT_EQUAL_STRING("e2e4", move.c_str());
 }
 
+// Tests for createMoveStr with three parameters (piece pickup sequence)
+void test_createMoveStr_3param_simple_pawn_move() {
+    bool before[BOARDWIDTHHIGHT][BOARDWIDTHHIGHT];
+    bool firstPiecePickedUp[BOARDWIDTHHIGHT][BOARDWIDTHHIGHT];
+    bool secondPiecePickedUp[BOARDWIDTHHIGHT][BOARDWIDTHHIGHT];
+    
+    createEmptyBoard(before);
+    createEmptyBoard(firstPiecePickedUp);
+    createEmptyBoard(secondPiecePickedUp);
+    
+    // Setup: Pawn move from e2 to e4
+    // State 1 (before): piece at e2
+    before[6][4] = true;  // e2
+    
+    // State 2 (firstPiecePickedUp): piece removed from e2
+    firstPiecePickedUp[6][4] = false;
+    
+    // State 3 (secondPiecePickedUp): piece placed at e4
+    secondPiecePickedUp[4][4] = true;
+    
+    std::string move = createMoveStr<8>(before, firstPiecePickedUp, secondPiecePickedUp);
+    TEST_ASSERT_EQUAL_STRING("e2e4", move.c_str());
+}
+
+void test_createMoveStr_3param_knight_move() {
+    bool before[BOARDWIDTHHIGHT][BOARDWIDTHHIGHT];
+    bool firstPiecePickedUp[BOARDWIDTHHIGHT][BOARDWIDTHHIGHT];
+    bool secondPiecePickedUp[BOARDWIDTHHIGHT][BOARDWIDTHHIGHT];
+    
+    createEmptyBoard(before);
+    createEmptyBoard(firstPiecePickedUp);
+    createEmptyBoard(secondPiecePickedUp);
+    
+    // Setup: Knight move from g1 to f3
+    before[7][6] = true;  // g1
+    firstPiecePickedUp[7][6] = false;
+    secondPiecePickedUp[5][5] = true;  // f3
+    
+    std::string move = createMoveStr<8>(before, firstPiecePickedUp, secondPiecePickedUp);
+    TEST_ASSERT_EQUAL_STRING("g1f3", move.c_str());
+}
+
+void test_createMoveStr_3param_diagonal_move() {
+    bool before[BOARDWIDTHHIGHT][BOARDWIDTHHIGHT];
+    bool firstPiecePickedUp[BOARDWIDTHHIGHT][BOARDWIDTHHIGHT];
+    bool secondPiecePickedUp[BOARDWIDTHHIGHT][BOARDWIDTHHIGHT];
+    
+    createEmptyBoard(before);
+    createEmptyBoard(firstPiecePickedUp);
+    createEmptyBoard(secondPiecePickedUp);
+    
+    // Bishop move from c1 to f4
+    before[7][2] = true;  // c1
+    firstPiecePickedUp[7][2] = false;
+    secondPiecePickedUp[4][5] = true;  // f4
+    
+    std::string move = createMoveStr<8>(before, firstPiecePickedUp, secondPiecePickedUp);
+    TEST_ASSERT_EQUAL_STRING("c1f4", move.c_str());
+}
+
+void test_createMoveStr_3param_corner_to_corner() {
+    bool before[BOARDWIDTHHIGHT][BOARDWIDTHHIGHT];
+    bool firstPiecePickedUp[BOARDWIDTHHIGHT][BOARDWIDTHHIGHT];
+    bool secondPiecePickedUp[BOARDWIDTHHIGHT][BOARDWIDTHHIGHT];
+    
+    createEmptyBoard(before);
+    createEmptyBoard(firstPiecePickedUp);
+    createEmptyBoard(secondPiecePickedUp);
+    
+    // Move from a1 to h8
+    before[7][0] = true;   // a1
+    firstPiecePickedUp[7][0] = false;
+    secondPiecePickedUp[0][7] = true;  // h8
+    
+    std::string move = createMoveStr<8>(before, firstPiecePickedUp, secondPiecePickedUp);
+    TEST_ASSERT_EQUAL_STRING("a1h8", move.c_str());
+}
+
+void test_createMoveStr_3param_single_square_move() {
+    bool before[BOARDWIDTHHIGHT][BOARDWIDTHHIGHT];
+    bool firstPiecePickedUp[BOARDWIDTHHIGHT][BOARDWIDTHHIGHT];
+    bool secondPiecePickedUp[BOARDWIDTHHIGHT][BOARDWIDTHHIGHT];
+    
+    createEmptyBoard(before);
+    createEmptyBoard(firstPiecePickedUp);
+    createEmptyBoard(secondPiecePickedUp);
+    
+    // Move from d4 to d5 (one square forward)
+    before[4][3] = true;   // d4
+    firstPiecePickedUp[4][3] = false;
+    secondPiecePickedUp[3][3] = true;  // d5
+    
+    std::string move = createMoveStr<8>(before, firstPiecePickedUp, secondPiecePickedUp);
+    TEST_ASSERT_EQUAL_STRING("d4d5", move.c_str());
+}
+
+void test_createMoveStr_3param_horizontal_move() {
+    bool before[BOARDWIDTHHIGHT][BOARDWIDTHHIGHT];
+    bool firstPiecePickedUp[BOARDWIDTHHIGHT][BOARDWIDTHHIGHT];
+    bool secondPiecePickedUp[BOARDWIDTHHIGHT][BOARDWIDTHHIGHT];
+    
+    createEmptyBoard(before);
+    createEmptyBoard(firstPiecePickedUp);
+    createEmptyBoard(secondPiecePickedUp);
+    
+    // Rook move from a4 to h4 (horizontal)
+    before[4][0] = true;   // a4
+    firstPiecePickedUp[4][0] = false;
+    secondPiecePickedUp[4][7] = true;  // h4
+    
+    std::string move = createMoveStr<8>(before, firstPiecePickedUp, secondPiecePickedUp);
+    TEST_ASSERT_EQUAL_STRING("a4h4", move.c_str());
+}
+
+void test_createMoveStr_3param_vertical_move() {
+    bool before[BOARDWIDTHHIGHT][BOARDWIDTHHIGHT];
+    bool firstPiecePickedUp[BOARDWIDTHHIGHT][BOARDWIDTHHIGHT];
+    bool secondPiecePickedUp[BOARDWIDTHHIGHT][BOARDWIDTHHIGHT];
+    
+    createEmptyBoard(before);
+    createEmptyBoard(firstPiecePickedUp);
+    createEmptyBoard(secondPiecePickedUp);
+    
+    // Rook move from e1 to e8 (vertical)
+    before[7][4] = true;   // e1
+    firstPiecePickedUp[7][4] = false;
+    secondPiecePickedUp[0][4] = true;  // e8
+    
+    std::string move = createMoveStr<8>(before, firstPiecePickedUp, secondPiecePickedUp);
+    TEST_ASSERT_EQUAL_STRING("e1e8", move.c_str());
+}
+
+void test_createMoveStr_3param_no_change_in_first_step() {
+    bool before[BOARDWIDTHHIGHT][BOARDWIDTHHIGHT];
+    bool firstPiecePickedUp[BOARDWIDTHHIGHT][BOARDWIDTHHIGHT];
+    bool secondPiecePickedUp[BOARDWIDTHHIGHT][BOARDWIDTHHIGHT];
+    
+    createEmptyBoard(before);
+    createEmptyBoard(firstPiecePickedUp);
+    createEmptyBoard(secondPiecePickedUp);
+    
+    // No change between before and firstPiecePickedUp
+    before[6][4] = true;
+    firstPiecePickedUp[6][4] = true;  // Piece not removed
+    secondPiecePickedUp[4][4] = true;
+    
+    std::string move = createMoveStr<8>(before, firstPiecePickedUp, secondPiecePickedUp);
+    TEST_ASSERT_EQUAL_STRING("", move.c_str());
+}
+
+void test_createMoveStr_3param_no_change_in_second_step() {
+    bool before[BOARDWIDTHHIGHT][BOARDWIDTHHIGHT];
+    bool firstPiecePickedUp[BOARDWIDTHHIGHT][BOARDWIDTHHIGHT];
+    bool secondPiecePickedUp[BOARDWIDTHHIGHT][BOARDWIDTHHIGHT];
+    
+    createEmptyBoard(before);
+    createEmptyBoard(firstPiecePickedUp);
+    createEmptyBoard(secondPiecePickedUp);
+    
+    // No change between firstPiecePickedUp and secondPiecePickedUp
+    before[6][4] = true;
+    firstPiecePickedUp[6][4] = false;  // Piece removed
+    secondPiecePickedUp[6][4] = false; // No placement (same as pickup state)
+    
+    std::string move = createMoveStr<8>(before, firstPiecePickedUp, secondPiecePickedUp);
+    TEST_ASSERT_EQUAL_STRING("", move.c_str());
+}
+
+void test_createMoveStr_3param_all_files() {
+    // Test moves from all files (a-h columns)
+    bool before[BOARDWIDTHHIGHT][BOARDWIDTHHIGHT];
+    bool firstPiecePickedUp[BOARDWIDTHHIGHT][BOARDWIDTHHIGHT];
+    bool secondPiecePickedUp[BOARDWIDTHHIGHT][BOARDWIDTHHIGHT];
+    
+    for (int col = 0; col < 8; col++) {
+        createEmptyBoard(before);
+        createEmptyBoard(firstPiecePickedUp);
+        createEmptyBoard(secondPiecePickedUp);
+        
+        char fromFile = 'a' + col;
+        char toFile = 'a' + ((col + 3) % 8);  // Move 3 files over (wrapping)
+        
+        before[6][col] = true;
+        firstPiecePickedUp[6][col] = false;
+        secondPiecePickedUp[3][(col + 3) % 8] = true;
+        
+        std::string move = createMoveStr<8>(before, firstPiecePickedUp, secondPiecePickedUp);
+        
+        std::string expected;
+        expected += fromFile;
+        expected += '2';
+        expected += toFile;
+        expected += '5';
+        
+        TEST_ASSERT_EQUAL_STRING(expected.c_str(), move.c_str());
+    }
+}
+
+void test_createMoveStr_3param_all_ranks() {
+    // Test moves from all ranks (1-8)
+    bool before[BOARDWIDTHHIGHT][BOARDWIDTHHIGHT];
+    bool firstPiecePickedUp[BOARDWIDTHHIGHT][BOARDWIDTHHIGHT];
+    bool secondPiecePickedUp[BOARDWIDTHHIGHT][BOARDWIDTHHIGHT];
+    
+    for (int row = 0; row < 8; row++) {
+        createEmptyBoard(before);
+        createEmptyBoard(firstPiecePickedUp);
+        createEmptyBoard(secondPiecePickedUp);
+        
+        int fromRank = 8 - row;
+        int toRow = (row + 2) % 8;
+        int toRank = 8 - toRow;
+        
+        before[row][0] = true;
+        firstPiecePickedUp[row][0] = false;
+        secondPiecePickedUp[toRow][1] = true;
+        
+        std::string move = createMoveStr<8>(before, firstPiecePickedUp, secondPiecePickedUp);
+        
+        std::string expected;
+        expected += 'a';
+        expected += std::to_string(fromRank);
+        expected += 'b';
+        expected += std::to_string(toRank);
+        
+        TEST_ASSERT_EQUAL_STRING(expected.c_str(), move.c_str());
+    }
+}
+
+void test_createMoveStr_3param_wrapped_move() {
+    // Test a move that goes beyond the normal pattern
+    bool before[BOARDWIDTHHIGHT][BOARDWIDTHHIGHT];
+    bool firstPiecePickedUp[BOARDWIDTHHIGHT][BOARDWIDTHHIGHT];
+    bool secondPiecePickedUp[BOARDWIDTHHIGHT][BOARDWIDTHHIGHT];
+    
+    createEmptyBoard(before);
+    createEmptyBoard(firstPiecePickedUp);
+    createEmptyBoard(secondPiecePickedUp);
+    
+    // Move from h8 to a1 
+    before[0][7] = true;   // h8
+    firstPiecePickedUp[0][7] = false;
+    secondPiecePickedUp[7][0] = true;  // a1
+    
+    std::string move = createMoveStr<8>(before, firstPiecePickedUp, secondPiecePickedUp);
+    TEST_ASSERT_EQUAL_STRING("h8a1", move.c_str());
+}
+
 
 int main(int argc, char **argv) {
     UNITY_BEGIN();
@@ -286,6 +534,20 @@ int main(int argc, char **argv) {
     
     // Test invalid scenarios
     RUN_TEST(test_createMoveStr_invalid_multiple_changes);
+    
+    // Test createMoveStr with three parameters (piece pickup sequence)
+    RUN_TEST(test_createMoveStr_3param_simple_pawn_move);
+    RUN_TEST(test_createMoveStr_3param_knight_move);
+    RUN_TEST(test_createMoveStr_3param_diagonal_move);
+    RUN_TEST(test_createMoveStr_3param_corner_to_corner);
+    RUN_TEST(test_createMoveStr_3param_single_square_move);
+    RUN_TEST(test_createMoveStr_3param_horizontal_move);
+    RUN_TEST(test_createMoveStr_3param_vertical_move);
+    RUN_TEST(test_createMoveStr_3param_no_change_in_first_step);
+    RUN_TEST(test_createMoveStr_3param_no_change_in_second_step);
+    RUN_TEST(test_createMoveStr_3param_all_files);
+    RUN_TEST(test_createMoveStr_3param_all_ranks);
+    RUN_TEST(test_createMoveStr_3param_wrapped_move);
     
     return UNITY_END();
 }

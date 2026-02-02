@@ -72,7 +72,7 @@ void callback(char* topic, byte* payload, unsigned int length)
         Serial.printf("Move from (%d, %d) to (%d, %d)\n", fromX, fromY, toX, toY);
 
         // check if a piece is captured and move it first if so
-        // if (lastState[toX][toY]) {
+        // if (lastMoveState[toX][toY]) {
         //     stepperMotor1.moveRight(toX * stepperMotor1.stepsPerSquare);
         //     stepperMotor2.moveRight(toY * stepperMotor2.stepsPerSquare);
         //     digitalWrite(pinMagneet, HIGH); // Activate magnet to pick up piece

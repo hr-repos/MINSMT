@@ -28,7 +28,12 @@ enum gameState {
     CHECKMATE
 };
 
-extern bool lastState[BOARDWIDTHHIGHT][BOARDWIDTHHIGHT];
+enum moveState {
+    NO_MOVE,
+    FIRST_MOVE_DETECTED,  // first piece picked up  // second piece detected (for capture detection)
+};
+
+extern bool lastMoveState[BOARDWIDTHHIGHT][BOARDWIDTHHIGHT];
 extern Multiplexer* multiPlexers[MULTIPLEXERS_COUNT];  
 extern StepperMotor stepperMotor1;
 extern StepperMotor stepperMotor2;
@@ -38,6 +43,7 @@ extern int playCode;
 extern String playcodeString;  
 extern LcdModule lcd;   
 extern gameState currentGameState;
+extern moveState currentMoveState;
 extern Timer timerOpponentCheck;
 extern uint8_t pinLedInactiveOpponentIndicator;
 extern uint8_t pinLedBoardsTurn;

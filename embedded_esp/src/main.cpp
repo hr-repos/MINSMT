@@ -21,7 +21,7 @@ void readBoardState(bool board[BOARDWIDTHHIGHT][BOARDWIDTHHIGHT]);
 void setup_wifi(const char *ssid, const char *password);
 
 // stores if a piece is detected on the corresponding place on the board
-bool lastState[BOARDWIDTHHIGHT][BOARDWIDTHHIGHT] = {false};
+bool lastMoveState[BOARDWIDTHHIGHT][BOARDWIDTHHIGHT] = {false};
 // Contains multiplexer objects for all 4 multiplexers
 Multiplexer* multiPlexers[MULTIPLEXERS_COUNT];  // defined as extern in config.h
 StepperMotor stepperMotor1(25,26, 0, 200);  // 1-7 as 
@@ -35,6 +35,7 @@ uint8_t pinMagneet = 30; // GPIO pin to indicate inactive opponent
 int playCode = 6933;//generatePlayCode();              // defined as extern in config.h // unique play code for this game session - is used as mqtt topic
 String playcodeString = String(playCode);
 gameState currentGameState = WAITING_FOR_PLAYERS;
+moveState currentMoveState = NO_MOVE;
 
 Timer timerKeepAlive(5000); // 5 seconds keepalive timer
 Timer timerOpponentCheck(10000); // 10 seconds opponent check timer
@@ -61,17 +62,17 @@ void setup()
     pinMode(pinLedInactiveOpponentIndicator, OUTPUT);
     pinMode(pinLedBoardsTurn, OUTPUT);
     
-    readBoardState(MULTIPLEXERS_COUNT, MULTIPLEXER_CHANNELS_COUNT, lastState);
+    readBoardState(MULTIPLEXERS_COUNT, MULTIPLEXER_CHANNELS_COUNT, lastMoveState);
     lcd.setTextFirstLine("Setup the board");
     lcd.setTextSecondLine("to start playing");
     delay(2000);
 
     // If the board is (re)started it must be in the starting position to continue
-    while (!isStartPosition(lastState))
+    while (!isStartPosition(lastMoveState))
     {
         Serial.println("\tWaiting for players to set up the board...");
         delay(2000);
-        readBoardState(MULTIPLEXERS_COUNT, MULTIPLEXER_CHANNELS_COUNT, lastState);
+        readBoardState(MULTIPLEXERS_COUNT, MULTIPLEXER_CHANNELS_COUNT, lastMoveState);
         // break; // temperary break to allow testing without board
     }
     
@@ -86,7 +87,7 @@ void setup()
     client.setKeepAlive(60);
 
 }
-
+bool firstMoveDetected = false;
 void loop()
 {
     // MQTT reconnect
@@ -99,18 +100,7 @@ void loop()
 
     if (currentGameState == WAITING_FOR_BOARD_MOVE)
     {
-        bool currentState[BOARDWIDTHHIGHT][BOARDWIDTHHIGHT];
-        readBoardState(MULTIPLEXERS_COUNT, MULTIPLEXER_CHANNELS_COUNT, currentState);
-        if (hasMoved(lastState, currentState)) 
-        {
-            Serial.println("Board changed, processing move...");
-            digitalWrite(pinLedBoardsTurn, LOW); // Turn off "board's turn" indicator
-            std::string move = createMoveStr(lastState, currentState);
-            Serial.println("Detected move: " + String(move.c_str()));
-            sendMessage((playcodeString + "/move/board").c_str(), move.c_str());
-            memcpy(lastState, currentState, sizeof(lastState));
-            currentGameState = WAITING_FOR_OPPONENT_MOVE;
-        }
+        handleBoardMove();
     }
 
     if (timerKeepAlive.checkTimer()) 
