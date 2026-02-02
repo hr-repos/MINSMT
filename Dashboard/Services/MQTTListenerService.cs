@@ -34,14 +34,14 @@ public class MqttListener
     {
         if (_currentBoardCode != null)
         {
-            await _client.UnsubscribeAsync($"{_currentBoardCode}/move");
+            await _client.UnsubscribeAsync($"{_currentBoardCode}/move/board");
         }
 
         await Connect();
 
         _currentBoardCode = boardCode;
 
-        await _client.SubscribeAsync($"{boardCode}/move");
+        await _client.SubscribeAsync($"{boardCode}/move/board");
 
         Console.WriteLine($"SUBSCRIBED TO BOARD {boardCode}");
         await SendSelectedSideToBoard();
@@ -66,16 +66,27 @@ public class MqttListener
             return;
 
         var message = new MqttApplicationMessageBuilder()
-            .WithTopic($"{_currentBoardCode}/move")
+            .WithTopic($"{_currentBoardCode}/move/external")
             .WithPayload(move)
             .Build();
 
         await _client.PublishAsync(message);
     }
 
-    public static async Task SendGameOverToBoard(string result)
+    public static async Task SendGameOverToBoard(string winner)
     {
         if (_client == null || !_client.IsConnected || _currentBoardCode == null)
+            return;
+
+        string? result = winner switch
+        {
+            "Draw"  => "0",
+            "White" => "1",
+            "Black" => "2",
+            _       => null
+        };
+
+        if (result == null)
             return;
 
         var message = new MqttApplicationMessageBuilder()
@@ -86,20 +97,20 @@ public class MqttListener
         await _client.PublishAsync(message);
     }
 
-    public static async Task SendMoveIsIllegal()
+    public static async Task SendMoveIsIllegal(string move)
     {
         if (_client == null || !_client.IsConnected || _currentBoardCode == null)
             return;
 
         var message = new MqttApplicationMessageBuilder()
             .WithTopic($"{_currentBoardCode}/illegalmove")
-            .WithPayload("1")
+            .WithPayload(move)
             .Build();
 
         await _client.PublishAsync(message);
     }
 
-    private static async void HandleBoardMessage(string payload)
+    private static async Task HandleBoardMessage(string payload)
     {
         var from = payload.Substring(0,2);
         var to = payload.Substring(2,2);
@@ -111,7 +122,13 @@ public class MqttListener
             promotion = payload[4]; // 'q', 'r', 'b', 'n'
         }
 
-        ChessboardService.ApplyPhysicalMove(from, to, promotion);
+        var success = ChessboardService.ApplyPhysicalMove(from, to, promotion);
+        if (!success)
+        {
+            Console.WriteLine($"ILLEGAL MOVE FROM BOARD: {from}{to}");
+            await SendMoveIsIllegal(from + to);
+            return;
+        }
         Console.WriteLine($"PLAYER MOVE: {from} to {to}");
 
         var aiMove = await ChessboardService.MakeAIMoveAsync();

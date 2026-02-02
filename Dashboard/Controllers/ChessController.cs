@@ -28,13 +28,13 @@ public class ChessController : Controller
     {
         ChessboardService.Reset();
 
-        await MqttListener.ConnectToBoard(settings.BoardCode);
-
         ChessboardService.Mode =
             settings.Mode == "cpu" ? GameMode.HumanVsAI : GameMode.HumanVsHuman;
 
         ChessboardService.HumanSide =
             settings.Side == "black" ? PlayerSide.Black : PlayerSide.White;
+
+        await MqttListener.ConnectToBoard(settings.BoardCode);
 
         ChessboardService.Difficulty = settings.Difficulty switch
         {
@@ -70,7 +70,7 @@ public class ChessController : Controller
 
         if (!success) 
         {
-            await MqttListener.SendMoveIsIllegal();
+            await MqttListener.SendMoveIsIllegal(move.From + move.To);
             return Json(new
             {
                 valid = false,
