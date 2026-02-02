@@ -68,7 +68,9 @@ public class ChessController : Controller
     {
         bool success = ChessboardService.ApplyPhysicalMove(move.From, move.To, move.Promotion);
 
-        if (!success)
+        if (!success) 
+        {
+            await MqttListener.SendMoveIsIllegal();
             return Json(new
             {
                 valid = false,
@@ -77,6 +79,7 @@ public class ChessController : Controller
                 checkSquare = ChessboardService.GetCheckSquare(),
                 checkAttackers = ChessboardService.GetCheckAttackers()
             });
+        }
 
         string winnerBeforeAi = ChessboardService.GetGameResult();
         string aiMove = null;
@@ -87,6 +90,9 @@ public class ChessController : Controller
         }
 
         string winner = ChessboardService.GetGameResult();
+
+        if (winner != null)
+            await MqttListener.SendGameOverToBoard(winner);
 
         return Json(new
         {
@@ -100,9 +106,13 @@ public class ChessController : Controller
     }
 
     [HttpPost]
-    public IActionResult Resign()
+    public async Task<IActionResult> Resign()
     {
         string winner = ChessboardService.Resign();
+
+    if (winner != null)
+            await MqttListener.SendGameOverToBoard(winner);
+
         return Json(new
         {
             winner = winner,

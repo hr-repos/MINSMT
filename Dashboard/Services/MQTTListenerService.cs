@@ -44,6 +44,20 @@ public class MqttListener
         await _client.SubscribeAsync($"{boardCode}/move");
 
         Console.WriteLine($"SUBSCRIBED TO BOARD {boardCode}");
+        await SendSelectedSideToBoard();
+    }
+
+    public static async Task SendSelectedSideToBoard()
+    {
+        if (_client == null || !_client.IsConnected || _currentBoardCode == null)
+            return;
+
+        var message = new MqttApplicationMessageBuilder()
+            .WithTopic($"{_currentBoardCode}/boardcolor")
+            .WithPayload(ChessboardService.HumanSide == PlayerSide.White ? "0" : "1") // Player is 0 when white, 1 when black
+            .Build();
+
+        await _client.PublishAsync(message);
     }
 
     public static async Task SendMoveToBoard(string move)
@@ -54,6 +68,32 @@ public class MqttListener
         var message = new MqttApplicationMessageBuilder()
             .WithTopic($"{_currentBoardCode}/move")
             .WithPayload(move)
+            .Build();
+
+        await _client.PublishAsync(message);
+    }
+
+    public static async Task SendGameOverToBoard(string result)
+    {
+        if (_client == null || !_client.IsConnected || _currentBoardCode == null)
+            return;
+
+        var message = new MqttApplicationMessageBuilder()
+            .WithTopic($"{_currentBoardCode}/gameover")
+            .WithPayload(result)
+            .Build();
+
+        await _client.PublishAsync(message);
+    }
+
+    public static async Task SendMoveIsIllegal()
+    {
+        if (_client == null || !_client.IsConnected || _currentBoardCode == null)
+            return;
+
+        var message = new MqttApplicationMessageBuilder()
+            .WithTopic($"{_currentBoardCode}/illegalmove")
+            .WithPayload("1")
             .Build();
 
         await _client.PublishAsync(message);
