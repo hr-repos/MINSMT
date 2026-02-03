@@ -50,8 +50,6 @@ public class ChessController : Controller
         if (ChessboardService.Mode == GameMode.HumanVsAI && ChessboardService.HumanSide == PlayerSide.Black)
         {
             string aiMove = await ChessboardService.MakeAIMoveAsync();
-            if (aiMove != null)
-                await MqttListener.SendMoveToBoard(aiMove);
         }
 
         return Json(new
@@ -70,6 +68,7 @@ public class ChessController : Controller
 
         if (!success) 
         {
+            Thread.Sleep(300);
             await MqttListener.SendMoveIsIllegal(move.From + move.To);
             return Json(new
             {

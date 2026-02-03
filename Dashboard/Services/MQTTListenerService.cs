@@ -123,8 +123,10 @@ public class MqttListener
         }
 
         var success = ChessboardService.ApplyPhysicalMove(from, to, promotion);
+    
         if (!success)
         {
+            Thread.Sleep(300);
             Console.WriteLine($"ILLEGAL MOVE FROM BOARD: {from}{to}");
             await SendMoveIsIllegal(from + to);
             return;
