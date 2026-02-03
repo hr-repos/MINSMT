@@ -21,7 +21,7 @@ void reconnectMqtt() {
             Serial.println("Subscribing to topics:");
             String topicAlive = playcodeString + "/alive/external";
             String topicMove = playcodeString + "/move/external";
-            String topicCheckmate = playcodeString + "/checkmate";
+            String topicCheckmate = playcodeString + "/gameover";
             String boardColor = playcodeString + "/boardcolor";
             String topicIllegalMove = playcodeString + "/illegalmove";
 
@@ -74,7 +74,7 @@ void callback(char* topic, byte* payload, unsigned int length)
         // check if a piece is captured and move it first if so
         if (lastMoveState[toX][toY]) {
             // coords must follow array indexing instead of chess notation so upper left = 0,0
-            movePiece(toX, toY, 8, 8, pinMagneet); // move captured piece off the board
+            movePiece(fromX, 7-fromY, toX, 7-toY, pinMagneet); // move captured piece off the board
         //     stepperMotor1.moveRight(toX * stepperMotor1.stepsPerSquare);
         //     stepperMotor2.moveRight(toY * stepperMotor2.stepsPerSquare);
         //     digitalWrite(pinMagneet, HIGH); // Activate magnet to pick up piece
@@ -82,6 +82,7 @@ void callback(char* topic, byte* payload, unsigned int length)
         //     stepperMotor2.moveRight(stepperMotor2.stepsPerSquare - toY * stepperMotor2.stepsPerSquare); // Small lift to avoid collision
         //     // code to move back to home here
         }
+        movePiece(fromX, 7-fromY, toX, 7-toY, pinMagneet); // move piece to new location
 
 
         currentGameState = WAITING_FOR_BOARD_MOVE;
@@ -91,7 +92,7 @@ void callback(char* topic, byte* payload, unsigned int length)
     if (strcmp(topic, (playcodeString + "/boardcolor").c_str() ) == 0){
         if (currentGameState == WAITING_FOR_PLAYERS) {
             // bij 0 mag het dashboard beginnen (is wit), bij 1 begint het bord (dashboard is zwart)
-            if (message[0] == '0') {
+            if (message[0] == '1') {
                 currentGameState = WAITING_FOR_OPPONENT_MOVE;
                 digitalWrite(pinLedBoardsTurn, LOW);
             }
@@ -109,11 +110,11 @@ void callback(char* topic, byte* payload, unsigned int length)
         digitalWrite(pinLedInactiveOpponentIndicator, LOW); // Test action
     }
 
-    if (strcmp(topic, (playcodeString + "/checkmate").c_str() ) == 0)
+    if (strcmp(topic, (playcodeString + "/gameover").c_str() ) == 0)
     {
-        Serial.println("Checkmate received from opponent.");
+        Serial.println("Game over received from opponent.");
         lcd.clearDisplay();
-        lcd.setTextFirstLine("Checkmate!");
+        lcd.setTextFirstLine("Game Over!");
         currentGameState = CHECKMATE;
     }
     if (strcmp(topic, (playcodeString + "/illegalmove").c_str() ) == 0)

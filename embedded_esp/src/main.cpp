@@ -31,11 +31,11 @@ WiFiClient espClient;                           // defined as extern in config.h
 PubSubClient client(espClient);                 // defined as extern in config.h
 
 LcdModule lcd;                                  // LCD module object
-uint8_t pinMagneet = 30; // GPIO pin to indicate inactive opponent
+uint8_t pinMagneet = 13; // GPIO pin to indicate inactive opponent
 
 int playCode = 6933;//generatePlayCode();              // defined as extern in config.h // unique play code for this game session - is used as mqtt topic
 String playcodeString = String(playCode);
-gameState currentGameState = WAITING_FOR_PLAYERS;
+gameState currentGameState = WAITING_FOR_OPPONENT_MOVE;// WAITING_FOR_PLAYERS;
 moveState currentMoveState = NO_MOVE;
 
 Timer timerKeepAlive(5000); // 5 seconds keepalive timer
@@ -62,6 +62,7 @@ void setup()
 
     pinMode(pinLedInactiveOpponentIndicator, OUTPUT);
     pinMode(pinLedBoardsTurn, OUTPUT);
+    pinMode(pinMagneet, OUTPUT);
     
     readBoardState(MULTIPLEXERS_COUNT, MULTIPLEXER_CHANNELS_COUNT, lastMoveState);
     lcd.setTextFirstLine("Setup the board");
@@ -74,7 +75,7 @@ void setup()
         Serial.println("\tWaiting for players to set up the board...");
         delay(2000);
         readBoardState(MULTIPLEXERS_COUNT, MULTIPLEXER_CHANNELS_COUNT, lastMoveState);
-        // break; // temperary break to allow testing without board
+        break; // temperary break to allow testing without board
     }
     
     Serial.println("Board set up correctly.");

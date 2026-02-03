@@ -44,6 +44,11 @@ void readBoardState(int muxCount, int channelCount, bool board[BOARDWIDTHHIGHT][
 /// @note Expect the 'to' location to be empty 
 /// @note Expects the starting position of the magnet to be at home (A8 -> 0,0)
 void movePiece(int fromX, int fromY, int toX, int toY, int magnetPin) {
+    Serial.printf("Move from (%d, %d) to (%d, %d)\n", fromX, fromY, toX, toY);
+    // return;
+    int squaresToMoveX = abs(fromX - toX);
+    int squaresToMoveY = abs(fromY - toY);
+
     if (fromX != 0) {
         // magent to the right
         stepperMotor2.moveRight(fromX * stepperMotor2.stepsPerSquare);        
@@ -69,7 +74,27 @@ void movePiece(int fromX, int fromY, int toX, int toY, int magnetPin) {
         stepperMotor2.moveLeft(stepperMotor2.stepsPerSquare / 2);
     }
 
-    stepperMotor1.moveRight(fromX * stepperMotor1.stepsPerSquare);
+    // move y-axis
+    if (toY > fromY){  stepperMotor1.moveRight(squaresToMoveY * stepperMotor1.stepsPerSquare); }
+    if (toY < fromY){  stepperMotor1.moveLeft(squaresToMoveY * stepperMotor1.stepsPerSquare); }
+
+    if (toX > fromX){  stepperMotor2.moveRight(squaresToMoveX * stepperMotor2.stepsPerSquare); }
+    if (toX < fromX){  stepperMotor2.moveLeft(squaresToMoveX * stepperMotor2.stepsPerSquare); }
+
+    // Move the piece in the middle of two pieces so it can be safely mved 
+    // without colliding with other pieces
+    if (toX != 7 || fromX != 7) {
+        stepperMotor2.moveLeft(stepperMotor2.stepsPerSquare / 2);
+    }
+    else {
+        stepperMotor2.moveRight(stepperMotor2.stepsPerSquare / 2);
+    }
+
+    digitalWrite(magnetPin, LOW); // Deactivate magnet to release piece
+
+    stepperMotor1.moveLeft(toY * stepperMotor1.stepsPerSquare);
+    stepperMotor2.moveLeft(toX * stepperMotor2.stepsPerSquare);
+    std::cout << "Move completed." << std::endl;
 }
 
 
@@ -112,6 +137,7 @@ void handleBoardMove(){
 
                 memcpy(lastMoveState, currentState, sizeof(lastMoveState));
                 currentGameState = WAITING_FOR_OPPONENT_MOVE;
+                currentMoveState = NO_MOVE;
                 break;
             }
 
@@ -130,16 +156,18 @@ void handleBoardMove(){
                     std::cout << "Waiting for piece to be placed back on board..." << std::endl;
                     delay(50);
                 }
+                std::cout << "Piece placed back on board after capture." << std::endl;
                 // move finsihed and can be stored/sent
                 digitalWrite(pinLedBoardsTurn, LOW); // Turn off "board's turn" indicator
                 memcpy(lastMoveState, currentState, sizeof(lastMoveState));
                 sendMessage((playcodeString + "/move/board").c_str(), move.c_str());
                 currentGameState = WAITING_FOR_OPPONENT_MOVE;
+                currentMoveState = NO_MOVE;
                 
                 currentPiecesCount--;
                 break;
             }
-            std::cout << "One of the if statements should be true here, error when this is printed" << std::endl;
+            std::cout << "Waiting for piece to be placed back on board... or a second piece to be picked up (for capture)" << std::endl;
         }
     }
 

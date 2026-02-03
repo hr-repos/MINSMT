@@ -16,7 +16,7 @@
 #define MQTT_USER ""
 #define MQTT_PASS ""
 #define WIFI_SSID "iotroam"
-#define WIFI_PASSWORD "Td|6s3@L&Pa<^!^1"
+#define WIFI_PASSWORD "O}0;v+3o&Ag^s-%|"
 
 #define MQTT_SERVER "145.24.237.4"
 #define MQTT_PORT 8883
