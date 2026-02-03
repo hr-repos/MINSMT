@@ -78,7 +78,6 @@ public static class ChessboardService
             return null;
 
         Game.MakeMove(aiMove, true);
-        await MqttListener.SendMoveToBoard(best);
         return best;
     }
 
