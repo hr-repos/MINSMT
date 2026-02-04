@@ -86,15 +86,17 @@ public class ChessController : Controller
         if (winnerBeforeAi == null)
         {
             aiMove = await ChessboardService.MakeAIMoveAsync();
-            await MqttListener.SendMoveToBoard(aiMove);
+            //await MqttListener.SendMoveToBoard(aiMove);
         }
 
         string winner = ChessboardService.GetGameResult();
-
+        
+        await MqttListener.SendMoveToBoard(move.From + move.To);
+        
         if (winner != null)
             await MqttListener.SendGameOverToBoard(winner);
 
-        await MqttListener.SendMoveToBoard(move.From + move.To);
+
         return Json(new
         {
             valid = true,

@@ -21,7 +21,7 @@ public class MqttListener
             var payload = Encoding.UTF8.GetString(e.ApplicationMessage.Payload);
             Console.WriteLine($"MQTT RECEIVED: {payload}");
 
-            HandleBoardMessage(payload);
+            HandleIncomingMessage(e.ApplicationMessage.Topic, payload);
             return Task.CompletedTask;
         };
         
@@ -42,6 +42,7 @@ public class MqttListener
         _currentBoardCode = boardCode;
 
         await _client.SubscribeAsync($"{boardCode}/move/board");
+        await _client.SubscribeAsync($"{boardCode}/reset");
 
         Console.WriteLine($"SUBSCRIBED TO BOARD {boardCode}");
         await SendSelectedSideToBoard();
@@ -110,7 +111,25 @@ public class MqttListener
         await _client.PublishAsync(message);
     }
 
-    private static async Task HandleBoardMessage(string payload)
+    private static async Task HandleIncomingMessage(string topic, string payload)
+    {
+        if (_currentBoardCode == null)
+            return;
+
+        if (topic == $"{_currentBoardCode}/move/board")
+        {
+            await HandleBoardMove(payload);
+            return;
+        }
+
+        if (topic == $"{_currentBoardCode}/reset")
+        {
+            HandleBoardReset();
+            return;
+        }
+    }
+
+    private static async Task HandleBoardMove(string payload)
     {
         var from = payload.Substring(0,2);
         var to = payload.Substring(2,2);
@@ -135,5 +154,11 @@ public class MqttListener
 
         var aiMove = await ChessboardService.MakeAIMoveAsync();
         Console.WriteLine($"AI MOVE: {aiMove}");
+    }
+
+    private static async Task HandleBoardReset()
+    {
+        Console.WriteLine("RESET RECEIVED FROM PHYSICAL BOARD");
+        ChessboardService.Reset();
     }
 }
