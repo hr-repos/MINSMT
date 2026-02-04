@@ -131,6 +131,12 @@ public class MqttListener
 
     private static async Task HandleBoardMove(string payload)
     {
+        if (payload.Length < 4) {
+            Console.WriteLine($"INVALID MOVE FROM BOARD: {payload}");
+            await SendMoveIsIllegal(payload);
+            return;
+        } 
+
         var from = payload.Substring(0,2);
         var to = payload.Substring(2,2);
         char? promotion = null;
