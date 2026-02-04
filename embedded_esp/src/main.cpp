@@ -4,6 +4,7 @@
 #include <WiFi.h>
 #include <PubSubClient.h>
 #include <string>
+#include <iostream>
 
 // Put internal dependencies here:
 #include "logic.h"
@@ -31,17 +32,19 @@ WiFiClient espClient;                           // defined as extern in config.h
 PubSubClient client(espClient);                 // defined as extern in config.h
 
 LcdModule lcd;                                  // LCD module object
-uint8_t pinMagneet = 13; // GPIO pin to indicate inactive opponent
 
 int playCode = 6933;//generatePlayCode();              // defined as extern in config.h // unique play code for this game session - is used as mqtt topic
 String playcodeString = String(playCode);
-gameState currentGameState = WAITING_FOR_OPPONENT_MOVE;// WAITING_FOR_PLAYERS;
+gameState currentGameState = WAITING_FOR_PLAYERS;// WAITING_FOR_PLAYERS;
 moveState currentMoveState = NO_MOVE;
 
 Timer timerKeepAlive(5000); // 5 seconds keepalive timer
 Timer timerOpponentCheck(10000); // 10 seconds opponent check timer
+int currentPiecesCount = 32;
+bool lastMoveWasCapture = false;
 
-uint8_t pinbuttonReset = 4; // GPIO pin to indicate inactive opponent
+uint8_t pinMagneet = 13; // GPIO pin to indicate inactive opponent
+uint8_t pinbuttonReset = 16; // GPIO pin to indicate inactive opponent
 uint8_t pinbuttonShutdown = 16; // GPIO pin to indicate inactive opponent
 uint8_t pinLedBoardsTurn = 27; // GPIO pin to indicate inactive opponent
 uint8_t pinLedInactiveOpponentIndicator = 14; // GPIO pin to indicate inactive opponent
@@ -75,7 +78,7 @@ void setup()
         Serial.println("\tWaiting for players to set up the board...");
         delay(2000);
         readBoardState(MULTIPLEXERS_COUNT, MULTIPLEXER_CHANNELS_COUNT, lastMoveState);
-        break; // temperary break to allow testing without board
+        // break; // temperary break to allow testing without board
     }
     
     Serial.println("Board set up correctly.");
@@ -86,7 +89,7 @@ void setup()
     setup_wifi(WIFI_SSID, WIFI_PASSWORD);
     client.setServer(MQTT_SERVER, MQTT_PORT);
     client.setCallback(callback);
-    client.setKeepAlive(60);
+    client.setKeepAlive(600);
 
 }
 bool firstMoveDetected = false;
@@ -119,9 +122,20 @@ void loop()
         digitalWrite(pinLedInactiveOpponentIndicator, HIGH);
     }
 
-    if (pinbuttonReset == HIGH) 
+    if (currentGameState == ILLEGAL_MOVE) 
     {
-        ESP.restart();
+        if (digitalRead(pinbuttonReset) == HIGH){
+            Serial.println("Reset button pressed. Restarting...");
+            if (lastMoveWasCapture == true){
+                currentPiecesCount +=1;
+                std::cout << "Restored captured piece. Current pieces: " << currentPiecesCount << std::endl;
+            }
+            lcd.clearDisplay();
+            lcd.setTextFirstLine("Game active!");
+            readBoardState(MULTIPLEXERS_COUNT, MULTIPLEXER_CHANNELS_COUNT, lastMoveState);
+            currentGameState = WAITING_FOR_BOARD_MOVE;
+            digitalWrite(pinLedBoardsTurn, HIGH); // Turn on "board's turn" indicator
+        }
     }
 
     if (currentGameState == CHECKMATE) 

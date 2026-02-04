@@ -1,5 +1,6 @@
 #include "logic.h"
 #include <iostream>
+#include <cstring>
 // #include "Arduino.h"
 
 /**
@@ -81,18 +82,19 @@ std::string createMoveStr(const bool (&before)[N][N], const bool (&after)[N][N])
     }
     
     // Only return move string if both from and to positions were found
+    std::string s;
+    s.push_back(fromX);
+    s += std::to_string(fromY);
+    s.push_back(toX);
+    s += std::to_string(toY);
     if (fromFound && toFound) {
-        std::string s;
-        s.push_back(fromX);
-        s += std::to_string(fromY);
-        s.push_back(toX);
-        s += std::to_string(toY);
         return s;
     }
     
     // Return empty string if no valid move detected
-    std::cout << "Error creating move string with capture: invalid positions detected." << std::endl;
-    return "";
+    std::cout << "Error creating move string: invalid positions detected. Move: "  << std::endl;
+    std::cout << "\tFrom: " << fromX << ";" << fromY << ", To: " << toX <<";"<< toY << std::endl;
+    return "-1";
 }
 
 /// @brief This function creates a move string based on the board state before, inbetween and 
@@ -123,7 +125,7 @@ std::string createMoveStr(const bool (&before)[N][N], const bool (&firstPiecePic
     
     std::cout << "Error creating move string with capture: invalid positions detected." << std::endl;
     // Return empty string if no valid move detected
-    return "";
+    return "-1";
 }
 
 
@@ -212,4 +214,18 @@ void moveStrToCoords(char* moveStr, int& fromX, int& fromY, int& toX, int& toY){
     fromY = moveStr[1] - '1'; // Convert '1'-'8' to 0-7
     toX = moveStr[2] - 'a';   // Convert 'a'-'h' to 0-7
     toY = moveStr[3] - '1';   // Convert '1'-'8' to 0-7
+}
+
+bool validateMoveStr(char* movestr){
+    // Basic validation for move string format (e.g., "e2e4")
+    if (strlen(movestr) != 4) {
+        return false;
+    }
+    if (movestr[0] < 'a' || movestr[0] > 'h' || movestr[2] < 'a' || movestr[2] > 'h') {
+        return false;
+    }
+    if (movestr[1] < '1' || movestr[1] > '8' || movestr[3] < '1' || movestr[3] > '8') {
+        return false;
+    }
+    return true;
 }

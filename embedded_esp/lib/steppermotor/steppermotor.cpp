@@ -10,7 +10,7 @@ directionPin(dirPin), stepPin(stepPin), sleepPin(sleepPin), stepsPerSquare(steps
 }
 
 void StepperMotor::moveLeft(int steps) {
-    std::cout << "Moving left " << steps << " steps." << std::endl;
+    std::cout << "Motor: " << stepPin << " Moving left " << steps << " steps." << std::endl;
     digitalWrite(directionPin ,HIGH); // Set Dir high
     digitalWrite(sleepPin ,HIGH); // Set Dir high
     for(int i = 0; i < steps; i++) // Loop 200 times
@@ -25,7 +25,7 @@ void StepperMotor::moveLeft(int steps) {
 }
 
 void StepperMotor::moveRight(int steps) {
-    std::cout << "Moving right " << steps << " steps." << std::endl;
+    std::cout << "Motor: " << stepPin << " Moving right " << steps << " steps." << std::endl;
     digitalWrite(directionPin, LOW); // Set Dir low
     digitalWrite(sleepPin ,HIGH); // Set Dir high
 

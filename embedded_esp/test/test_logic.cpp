@@ -173,7 +173,7 @@ void test_createMoveStr_no_move() {
     after[3][3] = true;
     
     std::string move = createMoveStr<8>(before, after);
-    TEST_ASSERT_EQUAL_STRING("", move.c_str());
+    TEST_ASSERT_EQUAL_STRING("-1", move.c_str());
 }
 
 void test_createMoveStr_capture_move() {
@@ -404,7 +404,7 @@ void test_createMoveStr_3param_no_change_in_first_step() {
     secondPiecePickedUp[4][4] = true;
     
     std::string move = createMoveStr<8>(before, firstPiecePickedUp, secondPiecePickedUp);
-    TEST_ASSERT_EQUAL_STRING("", move.c_str());
+    TEST_ASSERT_EQUAL_STRING("-1", move.c_str());
 }
 
 void test_createMoveStr_3param_no_change_in_second_step() {
@@ -422,7 +422,7 @@ void test_createMoveStr_3param_no_change_in_second_step() {
     secondPiecePickedUp[6][4] = false; // No placement (same as pickup state)
     
     std::string move = createMoveStr<8>(before, firstPiecePickedUp, secondPiecePickedUp);
-    TEST_ASSERT_EQUAL_STRING("", move.c_str());
+    TEST_ASSERT_EQUAL_STRING("-1", move.c_str());
 }
 
 void test_createMoveStr_3param_all_files() {

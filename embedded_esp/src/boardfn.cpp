@@ -74,13 +74,22 @@ void movePiece(int fromX, int fromY, int toX, int toY, int magnetPin) {
         stepperMotor2.moveLeft(stepperMotor2.stepsPerSquare / 2);
     }
 
-    // move y-axis
-    if (toY > fromY){  stepperMotor1.moveRight(squaresToMoveY * stepperMotor1.stepsPerSquare); }
-    if (toY < fromY){  stepperMotor1.moveLeft(squaresToMoveY * stepperMotor1.stepsPerSquare); }
+    if (toX != -1){
+        // move y-axis
+        if (toY > fromY){  stepperMotor1.moveRight(squaresToMoveY * stepperMotor1.stepsPerSquare); }
+        if (toY < fromY){  stepperMotor1.moveLeft(squaresToMoveY * stepperMotor1.stepsPerSquare); }
 
-    if (toX > fromX){  stepperMotor2.moveRight(squaresToMoveX * stepperMotor2.stepsPerSquare); }
-    if (toX < fromX){  stepperMotor2.moveLeft(squaresToMoveX * stepperMotor2.stepsPerSquare); }
-
+        if (toX > fromX){  stepperMotor2.moveRight(squaresToMoveX * stepperMotor2.stepsPerSquare); }
+        if (toX < fromX){  stepperMotor2.moveLeft(squaresToMoveX * stepperMotor2.stepsPerSquare); }
+    }
+    else{
+        // Alleen bij capture
+        std::cout << "Moving piece off the board due to capture..." << std::endl;
+        stepperMotor1.moveRight(8 - fromY * stepperMotor1.stepsPerSquare); // move to bottom of board
+        digitalWrite(magnetPin, LOW); // Deactivate magnet to release piece
+        stepperMotor1.moveLeft(8 - fromY * stepperMotor1.stepsPerSquare);
+        delay(1000); // wait for the piece to be moved off the board
+    }
     // Move the piece in the middle of two pieces so it can be safely mved 
     // without colliding with other pieces
     if (toX != 7 || fromX != 7) {
@@ -90,10 +99,13 @@ void movePiece(int fromX, int fromY, int toX, int toY, int magnetPin) {
         stepperMotor2.moveRight(stepperMotor2.stepsPerSquare / 2);
     }
 
-    digitalWrite(magnetPin, LOW); // Deactivate magnet to release piece
+    
+    if (toX != -1){
+        digitalWrite(magnetPin, LOW); // Deactivate magnet to release piece
+        stepperMotor1.moveLeft(toY * stepperMotor1.stepsPerSquare);
+        stepperMotor2.moveLeft(toX * stepperMotor2.stepsPerSquare);
+    }
 
-    stepperMotor1.moveLeft(toY * stepperMotor1.stepsPerSquare);
-    stepperMotor2.moveLeft(toX * stepperMotor2.stepsPerSquare);
     std::cout << "Move completed." << std::endl;
 }
 
@@ -103,7 +115,7 @@ void movePiece(int fromX, int fromY, int toX, int toY, int magnetPin) {
 
 
 
-int currentPiecesCount = 32;
+
 bool firstPiecePickedUp[BOARDWIDTHHIGHT][BOARDWIDTHHIGHT]= {false};
 
 /// @brief handles reading of the board movements to be sent to the opponent
@@ -121,18 +133,25 @@ void handleBoardMove(){
                 std::cout << "Piece picked up at row " << change.first << ", column " << change.second << std::endl;
                 currentMoveState = FIRST_MOVE_DETECTED;
                 memcpy(firstPiecePickedUp, currentState, sizeof(firstPiecePickedUp));
+                delay(200); // delay to prevent detecting the piece places doen instantly
             }
             break;
         }
 
         case FIRST_MOVE_DETECTED: {
             // if the amount of pieces is the same as before after a piece was picked up, it means 
+            // auto change = detectChange(firstPiecePickedUp, currentState);
+
+            // if (change == std::make_pair(-1, -1)){
+            //     std::cout << "not places down yet" << std::endl;
+            //     return;
+            // }
             // the piece was placed without capturing
             if (countPieces(currentState) == currentPiecesCount){
                 digitalWrite(pinLedBoardsTurn, LOW); // Turn off "board's turn" indicator
                 
-                std::string move = createMoveStr(lastMoveState,  firstPiecePickedUp, currentState);
-                Serial.println("Detected move: " + String(move.c_str()));
+                std::string move = createMoveStr(lastMoveState, currentState);
+                std::cout << "Detected move: " + move << " detected " << countPieces(currentState)<< "/" << currentPiecesCount << " pieces" << std::endl;
                 sendMessage((playcodeString + "/move/board").c_str(), move.c_str());
 
                 memcpy(lastMoveState, currentState, sizeof(lastMoveState));
@@ -146,7 +165,7 @@ void handleBoardMove(){
             // to date before sending the move to the dashboard
             if (countPieces(currentState) == currentPiecesCount - 2){
                 std::string move = createMoveStr(lastMoveState, firstPiecePickedUp, currentState);
-                std::cout << "Detected move with capture: " + move << std::endl;
+                std::cout << "Detected move with capture: " + move << " detected " << countPieces(currentState) << " pieces" << std::endl;
 
                 // This should not take long
                 // this is blocking so the current state does not have the be stored in another variable
@@ -157,13 +176,14 @@ void handleBoardMove(){
                     delay(50);
                 }
                 std::cout << "Piece placed back on board after capture." << std::endl;
+                lastMoveWasCapture = true;
                 // move finsihed and can be stored/sent
                 digitalWrite(pinLedBoardsTurn, LOW); // Turn off "board's turn" indicator
                 memcpy(lastMoveState, currentState, sizeof(lastMoveState));
                 sendMessage((playcodeString + "/move/board").c_str(), move.c_str());
                 currentGameState = WAITING_FOR_OPPONENT_MOVE;
                 currentMoveState = NO_MOVE;
-                
+                Serial.println("piece captured 2");
                 currentPiecesCount--;
                 break;
             }

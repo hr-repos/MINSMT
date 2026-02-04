@@ -26,3 +26,4 @@ template <size_t N>
 int countPieces(const bool (&first)[N][N]);
 
 void moveStrToCoords(char* moveStr, int& fromX, int& fromY, int& toX, int& toY);   
+bool validateMoveStr(char* movestr);

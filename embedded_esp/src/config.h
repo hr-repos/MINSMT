@@ -25,7 +25,8 @@ enum gameState {
     WAITING_FOR_PLAYERS,
     WAITING_FOR_OPPONENT_MOVE,
     WAITING_FOR_BOARD_MOVE,
-    CHECKMATE
+    CHECKMATE,
+    ILLEGAL_MOVE,
 };
 
 enum moveState {
@@ -48,3 +49,5 @@ extern Timer timerOpponentCheck;
 extern uint8_t pinLedInactiveOpponentIndicator;
 extern uint8_t pinLedBoardsTurn;
 extern uint8_t pinMagneet;
+extern int currentPiecesCount;
+extern bool lastMoveWasCapture;
