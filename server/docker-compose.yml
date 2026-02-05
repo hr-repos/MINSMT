@@ -1,0 +1,11 @@
+services:
+  mosquitto:
+    image: eclipse-mosquitto
+    container_name: mosquitto
+    volumes:
+      - "./mosquitto.conf:/mosquitto/config/mosquitto.conf"
+        #- "./mosquitto.passwd:/mosquitto/config/mosquitto.passwd"
+      - "./opt/mosquitto:/mosquitto"
+    ports:
+      - "8883:1883"
+      - "8884:1884"
