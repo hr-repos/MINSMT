@@ -25,5 +25,8 @@ std::pair<int, int> detectChange(const bool (&first)[N][N], const bool (&second)
 template <size_t N>
 int countPieces(const bool (&first)[N][N]);
 
+template <size_t N>
+void printTwoBoardStates(const bool (&before)[N][N], const bool (&after)[N][N]);
+
 void moveStrToCoords(char* moveStr, int& fromX, int& fromY, int& toX, int& toY);   
 bool validateMoveStr(char* movestr);

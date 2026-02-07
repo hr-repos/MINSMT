@@ -118,21 +118,18 @@ void loop()
 
     if (timerOpponentCheck.checkTimer()) 
     {
-        Serial.println("Opponent inactive...");
-        digitalWrite(pinLedInactiveOpponentIndicator, HIGH);
+        // Serial.println("Opponent inactive...");
+        // digitalWrite(pinLedInactiveOpponentIndicator, HIGH);
     }
 
     if (currentGameState == ILLEGAL_MOVE) 
     {
         if (digitalRead(pinbuttonReset) == HIGH){
             Serial.println("Reset button pressed. Restarting...");
-            if (lastMoveWasCapture == true){
-                currentPiecesCount +=1;
-                std::cout << "Restored captured piece. Current pieces: " << currentPiecesCount << std::endl;
-            }
             lcd.clearDisplay();
             lcd.setTextFirstLine("Game active!");
             readBoardState(MULTIPLEXERS_COUNT, MULTIPLEXER_CHANNELS_COUNT, lastMoveState);
+            currentPiecesCount = countPieces(lastMoveState);
             currentGameState = WAITING_FOR_BOARD_MOVE;
             digitalWrite(pinLedBoardsTurn, HIGH); // Turn on "board's turn" indicator
         }

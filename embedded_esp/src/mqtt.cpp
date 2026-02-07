@@ -87,12 +87,11 @@ void callback(char* topic, byte* payload, unsigned int length)
             // movePiece(toX, 7-toY, -1, -1, pinMagneet); // move captured piece off the board
             movePiece(fromX, 7-fromY, toX, 7-toY, pinMagneet); // move piece to new location
             Serial.println("piece captured 1");
-            currentPiecesCount--;
         }
         movePiece(fromX, 7-fromY, toX, 7-toY, pinMagneet); // move piece to new location
         delay(2000);
-        std::cout << "Move completed on board. current pieces: " << currentPiecesCount << std::endl;
         readBoardState(MULTIPLEXERS_COUNT, MULTIPLEXER_CHANNELS_COUNT, lastMoveState);
+        currentPiecesCount = countPieces(lastMoveState);
         std::cout << "now reading: " << countPieces(lastMoveState) << " pieces on the board" << std::endl;
         currentGameState = WAITING_FOR_BOARD_MOVE;
         digitalWrite(pinLedBoardsTurn, HIGH); // Turn on "board's turn" indicator
@@ -124,18 +123,25 @@ void callback(char* topic, byte* payload, unsigned int length)
 
     if (strcmp(topic, (playcodeString + "/gameover").c_str() ) == 0)
     {
+        digitalWrite(pinLedBoardsTurn, LOW); // Turn off "board's turn" indicator
         Serial.println("Game over received from opponent.");
         lcd.clearDisplay();
-        lcd.setTextFirstLine("Game Over!");
-        delay(3000);
+        lcd.setTextFirstLine("Game over!");
+        switch(message[0]) {
+            case '0':
+                lcd.setTextSecondLine("Draw!");
+                break;
+            case '1':
+                lcd.setTextSecondLine("White wins!");
+                break;
+            case '2':
+                lcd.setTextSecondLine("Black wins!");
+                break;
+            default:
+                break;
+        }
+        delay(5000);
         ESP.restart();
-        // while (!isStartPosition(lastMoveState))
-        // {
-        //     Serial.println("\tWaiting for players to set up the board...");
-        //     delay(2000);
-        //     readBoardState(MULTIPLEXERS_COUNT, MULTIPLEXER_CHANNELS_COUNT, lastMoveState);
-        //     // break; // temperary break to allow testing without board
-        // }
         currentGameState = WAITING_FOR_PLAYERS;
     }
     if (strcmp(topic, (playcodeString + "/illegalmove").c_str() ) == 0)
@@ -144,7 +150,6 @@ void callback(char* topic, byte* payload, unsigned int length)
         lcd.setTextFirstLine("Illegal move!");
         lcd.setTextSecondLine(message);
         currentGameState = ILLEGAL_MOVE;
-        // while(true){}
     }
         
 }

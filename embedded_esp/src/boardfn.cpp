@@ -184,7 +184,9 @@ void handleBoardMove(){
                 currentGameState = WAITING_FOR_OPPONENT_MOVE;
                 currentMoveState = NO_MOVE;
                 Serial.println("piece captured 2");
-                currentPiecesCount--;
+                readBoardState(MULTIPLEXERS_COUNT, MULTIPLEXER_CHANNELS_COUNT, lastMoveState);
+                currentPiecesCount = countPieces(lastMoveState);
+                // currentPiecesCount--;
                 break;
             }
             std::cout << "Waiting for piece to be placed back on board... or a second piece to be picked up (for capture)" << std::endl;

@@ -92,8 +92,11 @@ std::string createMoveStr(const bool (&before)[N][N], const bool (&after)[N][N])
     }
     
     // Return empty string if no valid move detected
-    std::cout << "Error creating move string: invalid positions detected. Move: "  << std::endl;
+    std::cout << "Error creating move string: invalid positions detected. Move: ";
     std::cout << "\tFrom: " << fromX << ";" << fromY << ", To: " << toX <<";"<< toY << std::endl;
+
+    printTwoBoardStates(before, after);
+
     return "-1";
 }
 
@@ -122,7 +125,6 @@ std::string createMoveStr(const bool (&before)[N][N], const bool (&firstPiecePic
         s += std::to_string(toY);
         return s;
     }
-    
     std::cout << "Error creating move string with capture: invalid positions detected." << std::endl;
     // Return empty string if no valid move detected
     return "-1";
@@ -159,8 +161,20 @@ bool hasMoved(const bool (&before)[N][N], const bool (&after)[N][N]){
 }
 
 template <size_t N>
-void movetest(const bool (&before)[N][N], const bool (&after)[N][N]){
-
+void printTwoBoardStates(const bool (&stateOne)[N][N], const bool (&stateTwo)[N][N]){
+    for (int row = 0; row < N; row++)
+    {
+        for (int column = 0; column < N; column++) 
+        {
+            std::cout << stateOne[row][column] << " ";
+        }
+        std::cout << "      ";
+        for (int column = 0; column < N; column++) 
+        {
+            std::cout << stateTwo[row][column] << " ";
+        }
+        std::cout << std::endl;
+    }
 }
 
 
