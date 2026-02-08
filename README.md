@@ -15,6 +15,11 @@ Daarnaast biedt het slimme bordspel een fysieke ervaring door middel van een ech
 - Dashboard voor het beheren van spellen en tegenstanders
 
 
+## Toekomstige uitbreidingen
+In een latere fase van dit product zou product kunnen werken met één hoofdmodule (de behuizing en de bewegende armen) en submodules (bovenkant inc sensoren en microcontroller). 
+Deze submodules zouden dan ook andere spellen kunnen zijn, zoals bijvoorbeeld Monopoly. 
+Het aantal eindgebruikers zouden met deze modules dan substantieel verder kunnen groeien met elke nieuw ontwikkelde submodule.
+
 ## Het slimme bordspel in detail
 ### Het dashboard
 Het dashboard is een webapplicatie die toegankelijk is via een browser. Hier kunnen bordspel eigenaren een schaakspel starten tegen een AI of menselijke tegenstander.
